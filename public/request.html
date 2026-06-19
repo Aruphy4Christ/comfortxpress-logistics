@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request a Rider | ComfortXpress Logistics</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { min-height: 100vh; display: flex; flex-direction: column; }
+        main { flex: 1; }
+
+        .form-input-field:focus {
+            border-color: #163961 !important;
+            background: #ffffff !important;
+            box-shadow: 0 0 0 4px rgba(22, 57, 97, 0.06);
+            outline: none;
+        }
+
+        footer { 
+            text-align: center; 
+            padding: 30px; 
+            color: #ffffff; 
+            background: #163961; 
+            margin-top: 40px;
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="brand-link">
+            <div class="brand-title">Comfort<span>Xpress</span></div>
+        </a>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="about.html">About Us</a>
+            <a href="request.html" class="active">Request a Rider</a>
+            <a href="track.html">Track Parcel</a>
+            <a href="contact.html">Track Parcel</a>
+        </nav>
+    </header>
+
+    <main style="max-width: 1200px; margin: 0 auto; padding: 6rem 20px 4rem 20px;">
+        <section style="background: #f8fafc; padding: 0; border-radius: 24px;">
+            <div style="max-width: 650px; margin: 0 auto; background: #ffffff; padding: 45px; border-radius: 24px; box-shadow: 0 15px 45px rgba(15, 23, 42, 0.04); border: 1px solid #e2e8f0;">
+
+                <div style="text-align: center; margin-bottom: 35px;">
+                    <i class="fa-solid fa-motorcycle" style="font-size: 2.2rem; color: #163961; margin-bottom: 12px;"></i>
+                    <h2 style="color: #163961; font-size: 2.2rem; font-weight: 800; margin: 0 0 8px 0;">Request an Instant Rider</h2>
+                    <p style="color: #64748b; font-size: 1rem; margin: 0;">Specify coordinates to summon an active delivery professional directly to your path.</p>
+                </div>
+
+                <form id="riderRequestForm" onsubmit="handleRiderRequest(event)">
+                    <div style="margin-bottom: 22px;">
+                        <label style="display: block; margin-bottom: 8px; color: #334155; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Sender Identity Name</label>
+                        <input type="text" id="customerName" required placeholder="Enter full name / business account reference" class="form-input-field" style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; font-family: inherit; font-size: 1rem; background: #f8fafc; color: #0f172a; transition: all 0.3s ease;">
+                    </div>
+
+                    <div style="margin-bottom: 22px;">
+                        <label style="display: block; margin-bottom: 8px; color: #334155; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Collection Point (Pickup Address)</label>
+                        <input type="text" id="pickupAddress" required placeholder="Specify precise pickup point markers" class="form-input-field" style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; font-family: inherit; font-size: 1rem; background: #f8fafc; color: #0f172a; transition: all 0.3s ease;">
+                    </div>
+
+                    <div style="margin-bottom: 22px;">
+                        <label style="display: block; margin-bottom: 8px; color: #334155; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Destination Point (Delivery Address)</label>
+                        <input type="text" id="deliveryAddress" required placeholder="Specify cargo drop-off objective target" class="form-input-field" style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; font-family: inherit; font-size: 1rem; background: #f8fafc; color: #0f172a; transition: all 0.3s ease;">
+                    </div>
+
+                    <div style="margin-bottom: 35px;">
+                        <label style="display: block; margin-bottom: 8px; color: #334155; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Classification Domain Logistics Type</label>
+                        <select id="packageDetails" class="form-input-field" style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; font-family: inherit; font-size: 1rem; background: #f8fafc; color: #0f172a; cursor: pointer; transition: all 0.3s ease;">
+                            <option value="Personal & Corporate Courier">Personal & Corporate Courier</option>
+                            <option value="Food Pickup & Delivery">Food Pickup & Delivery</option>
+                            <option value="Souvenirs & Event Logistics">Souvenirs & Event Logistics</option>
+                            <option value="General Errands Dispatch">General Errands Dispatch</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn" style="width: 100%; padding: 16px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; margin: 0; display: flex; align-items: center; justify-content: center; gap: 10px; background: #163961; color: white; border: none;">
+                        <i class="fa-solid fa-paper-plane"></i> Dispatch Fleet Partner
+                    </button>
+                </form>
+
+                <div id="successBox" style="display: none; padding: 25px; background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 5px solid #22c55e; border-radius: 14px; text-align: center; margin-top: 20px;">
+                    <i class="fa-solid fa-circle-check" style="font-size: 3rem; color: #22c55e; margin-bottom: 15px;"></i>
+                    <h4 style="color: #14532d; margin: 0 0 6px 0; font-size: 1.4rem; font-weight: 800;">Fulfillment Initialized</h4>
+                    <p style="color: #166534; margin: 0 0 20px 0; font-size: 0.95rem;">Your real-time routing query signature key has been generated:</p>
+                    <div id="generatedTrackingId" style="font-size: 2rem; font-weight: 900; color: #163961; letter-spacing: 1.5px; background: #ffffff; padding: 12px; border-radius: 10px; border: 1px dashed #cbd5e1; display: inline-block; margin-bottom: 25px; min-width: 200px;"></div>
+                    <button onclick="goToTracker()" class="btn" style="width: 100%; max-width: 320px; margin: 0 auto; padding: 14px; font-size: 1rem; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; background: #163961; color: white; border: none;">
+                        <i class="fa-solid fa-satellite"></i> Connect Live Telemetry Map &rarr;
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>&copy; 2026 ComfortXpress Logistics. All rights reserved.</footer>
+
+    <script>
+        let savedTrackingId = "";
+
+        async function handleRiderRequest(event) {
+            event.preventDefault();
+
+            const trackingId = "CX-" + Math.floor(Math.random() * 90000 + 10000);
+            savedTrackingId = trackingId;
+
+            const newOrder = {
+                trackingId: trackingId,
+                customerName: document.getElementById('customerName').value.trim(),
+                pickupAddress: document.getElementById('pickupAddress').value.trim(),
+                dropoffAddress: document.getElementById('deliveryAddress').value.trim(),
+                packageDetails: document.getElementById('packageDetails').value,
+                status: 'Pending',
+                origin: 'customer'
+            };
+
+            try {
+                const res = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newOrder)
+                });
+
+                if (res.ok) {
+                    document.getElementById('riderRequestForm').style.display = 'none';
+                    document.getElementById('generatedTrackingId').innerText = trackingId;
+                    document.getElementById('successBox').style.display = 'block';
+                } else {
+                    alert("Error connectivity pipeline encountered posting request.");
+                }
+            } catch (err) {
+                console.error("Transmission Exception:", err);
+                alert("Failed to reach logistics backend cluster.");
+            }
+        }
+
+        function goToTracker() {
+            if (savedTrackingId) {
+                window.location.href = `track.html?id=${savedTrackingId}`;
+            }
+        }
+    </script>
+</body>
+</html>

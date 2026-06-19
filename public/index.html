@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComfortXpress Logistics | Premium Delivery System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Base configuration for 3D Perspective Space */
+        #interactiveServices {
+            perspective: 1200px;
+            transform-style: preserve-3d;
+        }
+
+        /* Re-engineering the Service Card for Smooth JS Transitions & Rich Colors */
+        .service-card {
+            position: relative;
+            background: #ffffff;
+            padding: 45px 35px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(15, 23, 42, 0.03);
+            border: 1px solid #f1f5f9;
+            overflow: hidden;
+            
+            /* Crucial hooks for smooth hardware-accelerated JS handling */
+            transform-style: preserve-3d;
+            will-change: transform;
+            transition: transform 0.1s ease-out, box-shadow 0.4s ease, border-color 0.4s ease, opacity 0.6s ease-out;
+        }
+
+        /* Unique Colorful Themes per Card Variable Definition Hooks */
+        .service-card.corporate-theme { --theme-color: #1e3a8a; --theme-bg: #eff6ff; --theme-gradient: linear-gradient(135deg, #2563eb, #1d4ed8); }
+        .service-card.food-theme { --theme-color: #ea580c; --theme-bg: #fff7ed; --theme-gradient: linear-gradient(135deg, #f97316, #ea580c); }
+        .service-card.event-theme { --theme-color: #db2777; --theme-bg: #fdf2f8; --theme-gradient: linear-gradient(135deg, #ec4899, #db2777); }
+        .service-card.errand-theme { --theme-color: #0d9488; --theme-bg: #f0fdfa; --theme-gradient: linear-gradient(135deg, #14b8a6, #0d9488); }
+
+        /* Icon Container Design with Vibrant Dynamic Backdrops */
+        .service-icon-wrapper {
+            width: 70px;
+            height: 70px;
+            border-radius: 18px;
+            background: var(--theme-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            transform: translateZ(40px);
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Colorful Core Icon Font Properties */
+        .service-premium-icon {
+            font-size: 1.8rem;
+            color: var(--theme-color);
+            transition: color 0.3s ease;
+        }
+
+        .service-card h3 {
+            transform: translateZ(30px);
+            font-family: 'Inter', sans-serif;
+            font-size: 1.35rem;
+            color: #0f172a;
+            margin-top: 15px;
+            margin-bottom: 12px;
+        }
+
+        .service-card p {
+            transform: translateZ(20px);
+            color: #64748b;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .action-reveal {
+            transform: translateZ(25px);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: var(--theme-color);
+            margin-top: 20px;
+            transition: gap 0.3s ease, transform 0.3s ease;
+        }
+
+        /* High-Gloss Glare Overlay Construction Layer */
+        .glare-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            opacity: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.25) 0%, transparent 60%);
+            transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            will-change: background, opacity;
+        }
+
+        /* Active Color Explosion States managed on hover with JS transforms */
+        .service-card:hover {
+            border-color: transparent;
+        }
+        
+        .service-card.corporate-theme:hover { box-shadow: 0 25px 50px rgba(37, 99, 235, 0.15); }
+        .service-card.food-theme:hover { box-shadow: 0 25px 50px rgba(249, 115, 22, 0.15); }
+        .service-card.event-theme:hover { box-shadow: 0 25px 50px rgba(236, 72, 153, 0.15); }
+        .service-card.errand-theme:hover { box-shadow: 0 25px 50px rgba(20, 184, 166, 0.15); }
+
+        /* Transform icons into vivid solid color blocks on hover */
+        .service-card:hover .service-icon-wrapper {
+            background: var(--theme-gradient);
+            transform: translateZ(50px) scale(1.05);
+        }
+
+        .service-card:hover .service-premium-icon {
+            color: #ffffff;
+        }
+
+        .service-card:hover .action-reveal {
+            gap: 14px;
+            transform: translateZ(35px);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="brand-link">
+            <div class="brand-title">Comfort<span>Xpress</span></div>
+        </a>
+        <nav>
+            <a href="index.html" class="active">Home</a>
+            <a href="about.html">About Us</a>
+            <a href="request.html">Request a Rider</a>
+            <a href="track.html">Track Parcel</a>
+            <a href="contact.html">Contact Us</a>
+            
+        </nav>
+    </header>
+
+    <div class="hero-slider-container" id="heroSlider">
+        <div class="hero-overlay"></div>
+        
+        <div class="hero-content">
+            <h1>Fast & Efficient Transportation Solutions</h1>
+            <p>Delivering with care, absolute precision, and speed across Lagos. Your trusted ecosystem for commercial fulfillment and swift dispatcher connections.</p>
+            <a href="request.html" class="btn"><i class="fa-solid fa-motorcycle"></i> Request an Instant Rider</a>
+        </div>
+    </div>
+
+    <main style="max-width: 1200px; margin: 0 auto; padding: 6rem 20px 2rem 20px;">
+        <div class="section-header" style="text-align: center; margin-bottom: 60px;">
+            <span style="color: var(--accent-orange); font-weight: 700; text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem;">Our Capabilities</span>
+            <h2 style="color: var(--primary-blue); font-size: 2.6rem; font-weight: 800; margin: 10px 0 15px 0;">Our Premium Services</h2>
+            <div style="width: 60px; height: 4px; background: var(--accent-orange); margin: 0 auto 20px auto; border-radius: 2px;"></div>
+            <p style="color: #64748b; font-size: 1.15rem; max-width: 600px; margin: 0 auto;">Precision-tailored logistics operations built around absolute dependability.</p>
+        </div>
+
+        <div class="services-grid" id="interactiveServices" style="margin-bottom: 5rem;">
+            <div class="service-card corporate-theme" style="opacity: 0; transform: translateY(30px);">
+                <div class="glare-overlay"></div>
+                <div class="service-icon-wrapper">
+                    <i class="fa-solid fa-cubes-stacked service-premium-icon"></i>
+                </div>
+                <h3>Personal & Corporate</h3>
+                <p>On-demand courier delivery designed around complex enterprise corporate framework rules.</p>
+                <a href="request.html" class="action-reveal">Explore Framework <i class="fa-solid fa-arrow-right-long"></i></a>
+            </div>
+            
+            <div class="service-card food-theme" style="opacity: 0; transform: translateY(30px);">
+                <div class="glare-overlay"></div>
+                <div class="service-icon-wrapper">
+                    <i class="fa-solid fa-bowl-food service-premium-icon"></i>
+                </div>
+                <h3>Food Pickup & Delivery</h3>
+                <p>Thermal insulated dispatch routing ensuring cross-city food transfers retain ideal quality.</p>
+                <a href="request.html" class="action-reveal">Explore Framework <i class="fa-solid fa-arrow-right-long"></i></a>
+            </div>
+            
+            <div class="service-card event-theme" style="opacity: 0; transform: translateY(30px);">
+                <div class="glare-overlay"></div>
+                <div class="service-icon-wrapper">
+                    <i class="fa-solid fa-gifts service-premium-icon"></i>
+                </div>
+                <h3>Souvenirs & Event Logistics</h3>
+                <p>Bulk delivery management solutions built explicitly for large gatherings and corporate outreach setups.</p>
+                <a href="request.html" class="action-reveal">Explore Framework <i class="fa-solid fa-arrow-right-long"></i></a>
+            </div>
+            
+            <div class="service-card errand-theme" style="opacity: 0; transform: translateY(30px);">
+                <div class="glare-overlay"></div>
+                <div class="service-icon-wrapper">
+                    <i class="fa-solid fa-bolt-lightning service-premium-icon"></i>
+                </div>
+                <h3>General Errands</h3>
+                <p>Entrust your high-priority schedules to seasoned dispatch professionals who respect commitments.</p>
+                <a href="request.html" class="action-reveal">Explore Framework <i class="fa-solid fa-arrow-right-long"></i></a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-main">
+            <div class="footer-col">
+                <div class="brand-title" style="margin-bottom: 15px;">Comfort<span>Xpress</span></div>
+                <p>Premium intra-city freight fulfillment ecosystems built for speed, safety, and operational clarity.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Quick Navigation</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="track.html">Track Shipments</a></li>
+                    <li><a href="request.html">Request a Rider</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Access Points</h4>
+                <ul>
+                    <li><a href="login.html">Operational Login</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 ComfortXpress Logistics. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Centralized Image Database Array Configurator
+        const dynamicImages = [
+            'https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=2070',
+            'https://images.unsplash.com/photo-1533900298318-6b8da08a523e?q=80&w=2070',
+            'https://images.unsplash.com/photo-1616422285623-13ff0162193c?q=80&w=2070',
+            'https://images.unsplash.com/photo-1597047084897-51e81819a499?q=80&w=2070'
+        ];
+
+        const sliderContainer = document.getElementById('heroSlider');
+
+        // Dynamic background DOM generation
+        dynamicImages.forEach((imageUrl, index) => {
+            const slideElement = document.createElement('div');
+            slideElement.className = `hero-bg-slide${index === 0 ? ' active' : ''}`;
+            slideElement.style.backgroundImage = `url('${imageUrl}')`;
+            sliderContainer.insertBefore(slideElement, sliderContainer.firstChild);
+        });
+
+        const activeSlides = document.querySelectorAll('.hero-bg-slide');
+        let currentSlideIndex = 0;
+
+        setInterval(() => {
+            activeSlides[currentSlideIndex].classList.remove('active');
+            currentSlideIndex = (currentSlideIndex + 1) % activeSlides.length;
+            activeSlides[currentSlideIndex].classList.add('active');
+        }, 5000);
+
+        // Slick Staggered Entry Intersection Observer Script
+        const entryObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry, i) => {
+                if(entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.style.opacity = '1';
+                        // Keep our fallback transform pristine for smooth interaction overwrites
+                        entry.target.style.transform = 'perspective(1200px) translateY(0px)';
+                        entry.target.classList.add('visible');
+                    }, i * 120);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        const cards = document.querySelectorAll('.service-card');
+        cards.forEach(card => entryObserver.observe(card));
+
+        // ADVANCED MATH JS JAVASCRIPT SLICK 3D PARALLAX OVERLAY INTERACTION
+        cards.forEach(card => {
+            const glare = card.querySelector('.glare-overlay');
+
+            card.addEventListener('mousemove', (event) => {
+                const boundingBox = card.getBoundingClientRect();
+                
+                // Track spatial layout parameters relative to card boundaries
+                const localX = event.clientX - boundingBox.left;
+                const localY = event.clientY - boundingBox.top;
+
+                // Normalize coordinate vectors (-0.5 to 0.5 center reference offsets)
+                const normX = (localX / boundingBox.width) - 0.5;
+                const normY = (localY / boundingBox.height) - 0.5;
+
+                // Degree Threshold constraints
+                const tiltCap = 12;
+                const tiltX = (-normY * tiltCap).toFixed(2);
+                const tiltY = (normX * tiltCap).toFixed(2);
+
+                // Inject structural transform strings directly into DOM layout
+                card.style.transform = `perspective(1200px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.03) translateY(-4px)`;
+                
+                // Calculate directional lighting angles for dynamic tracking glare
+                if(glare) {
+                    glare.style.opacity = '1';
+                    glare.style.background = `radial-gradient(circle at ${localX}px ${localY}px, rgba(255, 255, 255, 0.35) 0%, rgba(255,255,255,0) 70%)`;
+                }
+            });
+
+            // Smoothly ease out orientation properties when cursor is withdrawn
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = `perspective(1200px) rotateX(0deg) rotateY(0deg) scale(1) translateY(0px)`;
+                card.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease';
+                if(glare) {
+                    glare.style.opacity = '0';
+                }
+            });
+
+            // Clear transitional ease blocks on card entry initialization
+            card.addEventListener('mouseenter', () => {
+                card.style.transition = 'transform 0.1s ease-out, box-shadow 0.4s ease';
+            });
+        });
+    </script>
+</body>
+</html>

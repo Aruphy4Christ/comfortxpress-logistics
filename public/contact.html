@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | ComfortXpress Logistics</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Contact-Specific Layout & Glassmorphism Design */
+        .contact-container {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 50px;
+            margin-bottom: 5rem;
+        }
+
+        @media (max-width: 968px) {
+            .contact-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+        }
+
+        /* Information Column Cards */
+        .contact-info-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .info-detail-card {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 10px 40px rgba(15, 23, 42, 0.02);
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .info-icon-box {
+            width: 55px;
+            height: 55px;
+            background: #eff6ff;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2563eb;
+            font-size: 1.4rem;
+        }
+
+        .info-detail-card h4 {
+            font-size: 1.1rem;
+            color: #0f172a;
+            margin-bottom: 5px;
+        }
+
+        .info-detail-card p {
+            color: #64748b;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Premium Form Architecture */
+        .contact-form-wrapper {
+            background: #ffffff;
+            padding: 45px;
+            border-radius: 24px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 15px 50px rgba(15, 23, 42, 0.04);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 640px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .form-group input, .form-group textarea {
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.95rem;
+            color: #0f172a;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            padding: 16px 32px;
+            border-radius: 14px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+        }
+
+        .submit-btn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
+            transform: translateY(-2px);
+        }
+
+        /* Accordion FAQ UI Blueprint */
+        .faq-section {
+            margin-top: 5rem;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 5rem;
+        }
+
+        .faq-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .faq-item {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+        }
+
+        .faq-trigger {
+            width: 100%;
+            padding: 22px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #0f172a;
+            cursor: pointer;
+        }
+
+        .faq-icon {
+            transition: transform 0.3s ease;
+            color: #64748b;
+        }
+
+        .faq-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+            padding: 0 28px;
+            color: #64748b;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .faq-item.active {
+            border-color: #cbd5e1;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+            color: #2563eb;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="brand-link">
+            <div class="brand-title">Comfort<span>Xpress</span></div>
+        </a>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="about.html">About Us</a>
+            <a href="request.html">Request a Rider</a>
+            <a href="track.html">Track Parcel</a>
+            <a href="contact.html" class="active">Contact Us</a>
+        </nav>
+    </header>
+
+    <main style="max-width: 1200px; margin: 0 auto; padding: 6rem 20px 2rem 20px;">
+        
+        <div class="section-header" style="text-align: center; margin-bottom: 60px;">
+            <span style="color: #ea580c; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem;">Get In Touch</span>
+            <h2 style="color: #1e3a8a; font-size: 2.6rem; font-weight: 800; margin: 10px 0 15px 0;">Contact Support Desk</h2>
+            <div style="width: 60px; height: 4px; background: #ea580c; margin: 0 auto 20px auto; border-radius: 2px;"></div>
+            <p style="color: #64748b; font-size: 1.15rem; max-width: 600px; margin: 0 auto;">Have inquiries regarding bulk deliveries or enterprise accounts? Connect with us instantly.</p>
+        </div>
+
+        <div class="contact-container">
+            
+            <div class="contact-info-panel">
+                <div class="info-detail-card">
+                    <div class="info-icon-box"><i class="fa-solid fa-location-dot"></i></div>
+                    <div>
+                        <h4>Central Operations Office</h4>
+                        <p>12 Allen Avenue, Ikeja,<br>Lagos, Nigeria.</p>
+                    </div>
+                </div>
+
+                <div class="info-detail-card">
+                    <div class="info-icon-box"><i class="fa-solid fa-phone"></i></div>
+                    <div>
+                        <h4>Hotline Connections</h4>
+                        <p>+234 (0) 800-COMFORT<br>+234 (0) 1-2345678</p>
+                    </div>
+                </div>
+
+                <div class="info-detail-card">
+                    <div class="info-icon-box"><i class="fa-solid fa-envelope"></i></div>
+                    <div>
+                        <h4>Digital Mail Communications</h4>
+                        <p>support@comfortxpress.com<br>dispatch@comfortxpress.com</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-form-wrapper">
+                <form id="supportContactForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="fullName">Full Name</label>
+                            <input type="text" id="fullName" placeholder="e.g. John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="emailAddress">Email Address</label>
+                            <input type="email" id="emailAddress" placeholder="e.g. john@example.com" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="msgSubject">Inquiry Subject</label>
+                        <input type="text" id="msgSubject" placeholder="e.g. Enterprise Logistics Account Pricing" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="messageBody">Detailed Message Context</label>
+                        <textarea id="messageBody" rows="5" placeholder="State your requirements clearly..." required></textarea>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="submit-btn">
+                        <i class="fa-solid fa-paper-plane"></i> Dispatch Digital Inquiry
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="faq-section">
+            <div class="section-header" style="text-align: center; margin-bottom: 40px;">
+                <h3 style="color: #1e3a8a; font-size: 2rem; font-weight: 800;">Frequently Asked Questions</h3>
+                <p style="color: #64748b; margin-top: 10px;">Quick foundational references regarding operational pipelines.</p>
+            </div>
+
+            <div class="faq-wrapper">
+                <div class="faq-item">
+                    <button class="faq-trigger">What are your standard operational transit hours? <i class="fa-solid fa-chevron-down faq-icon"></i></button>
+                    <div class="faq-content">
+                        <p>Our intra-city dispatch courier network operates actively from 7:00 AM to 9:00 PM, Mondays through Saturdays. Dedicated corporate enterprise frameworks can negotiate access for extended 24/7 night run fulfillment parameters.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-trigger">How secure are tracking parameters for fragile goods? <i class="fa-solid fa-chevron-down faq-icon"></i></button>
+                    <div class="faq-content">
+                        <p>Every dispatch runner handles cargo inside secure, weather-proof thermal or padded utility cases. Real-time geographical tracing coordinates are piped live to your tracking console from pickup to final verification handshakes.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-trigger">How can I set up business dashboard configurations? <i class="fa-solid fa-chevron-down faq-icon"></i></button>
+                    <div class="faq-content">
+                        <p>Reach out through the contact form above selecting 'Enterprise Logistics' as your subject. Our service desk team will activate your dedicated administrative portal and dispatch a streamlined volume agreement tier structure.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-main">
+            <div class="footer-col">
+                <div class="brand-title" style="margin-bottom: 15px;">Comfort<span>Xpress</span></div>
+                <p>Premium intra-city freight fulfillment ecosystems built for speed, safety, and operational clarity.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Quick Navigation</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="track.html">Track Shipments</a></li>
+                    <li><a href="request.html">Request a Rider</a></li>
+                    <li><a href="contact.html">Contact Us</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Access Points</h4>
+                <ul>
+                    <li><a href="login.html">Operational Login</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 ComfortXpress Logistics. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Interactive FAQ Accordion Trigger Script
+        const faqTriggers = document.querySelectorAll('.faq-trigger');
+
+        faqTriggers.forEach(trigger => {
+            trigger.addEventListener('click', () => {
+                const parent = trigger.parentElement;
+                const content = trigger.nextElementSibling;
+                const isActive = parent.classList.contains('active');
+
+                document.querySelectorAll('.faq-item').forEach(item => {
+                    item.classList.remove('active');
+                    item.querySelector('.faq-content').style.maxHeight = null;
+                    item.querySelector('.faq-content').style.paddingBottom = "0px";
+                });
+
+                if (!isActive) {
+                    parent.classList.add('active');
+                    content.style.maxHeight = content.scrollHeight + 40 + "px";
+                    content.style.paddingBottom = "25px";
+                }
+            });
+        });
+
+        // Live Backend Form Submit Pipeline
+        document.getElementById('supportContactForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const originalBtnHtml = submitBtn.innerHTML;
+            
+            const payload = {
+                fullName: document.getElementById('fullName').value,
+                emailAddress: document.getElementById('emailAddress').value,
+                msgSubject: document.getElementById('msgSubject').value,
+                messageBody: document.getElementById('messageBody').value
+            };
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Transmitting Inquiry...`;
+
+                const response = await fetch('/api/admin/inquiries', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    alert('Your message has been processed successfully! The desk team will read it inside the admin view dashboard panel.');
+                    this.reset();
+                } else {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error || 'Server rejected request block.');
+                }
+
+            } catch (err) {
+                console.error('Inquiry dispatch error:', err);
+                alert(`Pipeline connection failed: ${err.message || 'Could not verify database write execution.'}`);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHtml;
+            }
+        });
+    </script>
+</body>
+</html>

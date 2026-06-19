@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Fleet Tracking Ecosystem | ComfortXpress</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        /* Enhanced tracking input active focus mechanics */
+        #trackingInput:focus {
+            border-color: var(--primary-blue) !important;
+            background-color: var(--white) !important;
+            box-shadow: 0 0 0 4px rgba(22, 57, 97, 0.08);
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="brand-link">
+            <div class="brand-title">Comfort<span>Xpress</span></div>
+        </a>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="about.html">About Us</a>
+            <a href="request.html">Request a Rider</a>
+            <a href="track.html">Track Parcel</a>
+            <a href="contact.html">Contact Us</a>
+
+            
+        </nav>
+    </header>
+
+    <div class="page-container">
+        <h2 style="color: var(--primary-blue); font-size: 2.5rem; font-weight: 800; margin-bottom: 10px;">Consignment Fleet Tracker</h2>
+        <p style="color: #64748b; margin-bottom: 40px;">Input your unique booking tracking key to engage live telemetry mapping routes.</p>
+
+        <div style="background: var(--white); padding: 25px 35px; border-radius: 20px; box-shadow: 0 15px 45px rgba(22, 57, 97, 0.05); margin-bottom: 40px; border: 1px solid #e2e8f0;">
+            <div style="display: flex; gap: 15px; align-items: center; width: 100%;">
+                
+                <div style="position: relative; flex: 1;">
+                    <span style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: #94a3b8;">🔍</span>
+                    <input type="text" id="trackingInput" placeholder="Enter Tracking ID (e.g., CX-123456)" 
+                           style="width: 100%; padding: 16px 16px 16px 48px; border: 2px solid #e2e8f0; border-radius: 14px; box-sizing: border-box; font-size: 1.05rem; font-family: inherit; color: var(--dark-slate); font-weight: 600; background-color: #f8fafc; transition: all 0.3s ease;">
+                </div>
+
+                <button onclick="trackOrder()" class="btn" style="padding: 16px 40px; border-radius: 14px; font-size: 1.05rem; font-weight: 700; white-space: nowrap; margin: 0; height: 100%; display: flex; align-items: center; justify-content: center;">
+                    Locate Cargo
+                </button>
+
+            </div>
+        </div>
+
+        <div class="tracking-grid">
+            <div id="detailsCard" style="background: var(--white); padding: 40px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 40px rgba(0,0,0,0.02);">
+                <h3 style="margin-top:0; color: var(--primary-blue);">Cargo Profiles</h3>
+                <p style="color: #94a3b8;">Await database telemetry callback...</p>
+            </div>
+
+            <div class="map-simulation">
+                <canvas id="mapCanvas" style="width: 100%; height: 100%; display: block; background: #eaf2f8;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-bottom">
+            <p>&copy; 2026 ComfortXpress Logistics. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        const socket = io();
+        let currentStatus = "Pending";
+        
+        // Map Animation Positioning States (Lerp Configuration Setup)
+        let markerX = 60;
+        let markerY = 340;
+
+        // Real-time Canvas Vector Mapping Engine
+        const canvas = document.getElementById('mapCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            drawMap();
+        }
+        window.addEventListener('resize', resizeCanvas);
+        setTimeout(resizeCanvas, 100);
+
+        function drawMap() {
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            
+            // Draw simulated map transit grid lines
+            ctx.strokeStyle = "rgba(22, 57, 97, 0.08)";
+            ctx.lineWidth = 2;
+            for(let i=0; i<canvas.width; i+=40) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+            }
+            for(let j=0; j<canvas.height; j+=40) {
+                ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke();
+            }
+
+            // Define target coordinates based on delivery phase values
+            let startX = 60, startY = 340;
+            let endX = canvas.width - 60, endY = 60;
+            let targetX = startX, targetY = startY;
+
+            if(currentStatus === "In Transit") { targetX = canvas.width/2; targetY = canvas.height/2; }
+            if(currentStatus === "Arrived" || currentStatus === "Delivered") { targetX = endX; targetY = endY; }
+
+            // Linear Interpolation (Lerp Math) for smooth slide motion
+            markerX += (targetX - markerX) * 0.05;
+            markerY += (targetY - markerY) * 0.05;
+
+            // Draw route trace vector lines
+            ctx.strokeStyle = "rgba(22, 57, 97, 0.2)";
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw Base Hub Nodes
+            ctx.fillStyle = "#163961";
+            ctx.beginPath(); ctx.arc(startX, startY, 8, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = "#10b981";
+            ctx.beginPath(); ctx.arc(endX, endY, 8, 0, Math.PI*2); ctx.fill();
+
+            // Active Dispatch Telemetry Marker Pulse Ring
+            ctx.fillStyle = "rgba(245, 130, 31, 0.25)";
+            ctx.beginPath(); ctx.arc(markerX, markerY, 18 + Math.sin(Date.now()/150)*4, 0, Math.PI*2); ctx.fill();
+            
+            // Core Center Tracking Dot
+            ctx.fillStyle = "#F5821F";
+            ctx.beginPath(); ctx.arc(markerX, markerY, 8, 0, Math.PI*2); ctx.fill();
+        }
+        setInterval(drawMap, 30); // Higher frequency loop for crisp, smooth animations
+
+        async function trackOrder() {
+            const id = document.getElementById('trackingInput').value.trim();
+            if(!id) return;
+            
+            try {
+                const res = await fetch(`/api/orders/${id}`);
+                if(!res.ok) { alert("Tracking reference ID profile signature missing."); return; }
+                const order = await res.json();
+                
+                // Join WebSocket Room specific to this tracking ID
+                socket.emit('joinTrackingRoom', order.trackingId);
+                
+                renderDetails(order);
+            } catch(e) { console.error(e); }
+        }
+
+        function renderDetails(order) {
+            currentStatus = order.status;
+            document.getElementById('detailsCard').innerHTML = `
+                <h3 style="color:var(--primary-blue); margin-top:0;">Order Reference: <span style="color:var(--accent-orange);">${order.trackingId}</span></h3>
+                <div style="margin: 20px 0; padding:15px; background:#f8fafc; border-left:4px solid var(--accent-orange); border-radius:4px;">
+                    <strong>Status:</strong> ${order.status.toUpperCase()}
+                </div>
+                <p><strong>Customer Name:</strong> ${order.customerName}</p>
+                <p><strong>Pickup Coordinate Point:</strong> ${order.pickupAddress}</p>
+                <p><strong>Destination Point:</strong> ${order.deliveryAddress}</p>
+                <p><strong>Package Details:</strong> ${order.packageDetails}</p>
+            `;
+        }
+
+        // Shared handler utility function
+        function handleLiveStreamUpdate(updatedOrder) {
+            const currentId = document.getElementById('trackingInput').value.trim().toLowerCase();
+            if(updatedOrder && updatedOrder.trackingId && currentId === updatedOrder.trackingId.toLowerCase()) {
+                renderDetails(updatedOrder);
+                if(updatedOrder.status === "Arrived") {
+                    let synth = window.speechSynthesis;
+                    synth.speak(new SpeechSynthesisUtterance("Attention, your Comfort Xpress rider has arrived."));
+                }
+            }
+        }
+
+        // Listeners for global updates or isolated tracking rooms
+        socket.on('orderUpdated', handleLiveStreamUpdate);
+        socket.on('statusChanged', handleLiveStreamUpdate);
+        
+        socket.on('arrivalNotification', (message) => {
+            alert(message);
+        });
+
+        // --- AUTOMATED QUERY PARAMETER INTERCEPTION ENGINE ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const passedId = urlParams.get('id');
+            
+            if (passedId) {
+                document.getElementById('trackingInput').value = passedId.trim();
+                trackOrder(); // Instantly initialize the telemetry pipeline data call
+            }
+        });
+
+        // Highlight the nav link matching the current page (keeps navbar markup identical across pages)
+        (function setActiveNavLink() {
+            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+            document.querySelectorAll('nav a').forEach(link => {
+                const linkPage = link.getAttribute('href');
+                if (linkPage === currentPage) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
