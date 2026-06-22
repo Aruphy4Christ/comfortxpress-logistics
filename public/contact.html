@@ -254,7 +254,7 @@
                     <div class="info-icon-box"><i class="fa-solid fa-envelope"></i></div>
                     <div>
                         <h4>Digital Mail Communications</h4>
-                        <p>support@comfortxpress.com<br>dispatch@comfortxpress.com</p>
+                        <p>support [at] comfortxpress.com<br>dispatch [at] comfortxpress.com</p>
                     </div>
                 </div>
             </div>
@@ -279,7 +279,7 @@
 
                     <div class="form-group">
                         <label for="messageBody">Detailed Message Context</label>
-                        <textarea id="messageBody" rows="5" placeholder="State your requirements clearly..." required></textarea>
+                        <textarea id="messageBody" rows="5" placeholder="State your requirements clearly (minimum 10 characters)..." required></textarea>
                     </div>
 
                     <button type="submit" id="submitBtn" class="submit-btn">
@@ -380,35 +380,43 @@
             const originalBtnHtml = submitBtn.innerHTML;
             
             const payload = {
-                fullName: document.getElementById('fullName').value,
-                emailAddress: document.getElementById('emailAddress').value,
-                msgSubject: document.getElementById('msgSubject').value,
-                messageBody: document.getElementById('messageBody').value
+                fullName: document.getElementById('fullName').value.trim(),
+                emailAddress: document.getElementById('emailAddress').value.trim(),
+                msgSubject: document.getElementById('msgSubject').value.trim(),
+                messageBody: document.getElementById('messageBody').value.trim()
             };
+
+            // Double check length requirement frontend check
+            if (payload.messageBody.length < 10) {
+                alert('Validation Guard: Message body context must be at least 10 characters long.');
+                return;
+            }
 
             try {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Transmitting Inquiry...`;
+                submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Transmitting...`;
 
-                const response = await fetch('/api/admin/inquiries', {
+                const response = await fetch('/api/inquiries', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify(payload)
                 });
 
+                const data = await response.json().catch(() => ({}));
+
                 if (response.ok) {
-                    alert('Your message has been processed successfully! The desk team will read it inside the admin view dashboard panel.');
+                    alert(data.message || 'Your message has been received. We will get back to you shortly.');
                     this.reset();
                 } else {
-                    const errData = await response.json().catch(() => ({}));
-                    throw new Error(errData.error || 'Server rejected request block.');
+                    throw new Error(data.error || `Server returned status context: ${response.status}`);
                 }
 
             } catch (err) {
                 console.error('Inquiry dispatch error:', err);
-                alert(`Pipeline connection failed: ${err.message || 'Could not verify database write execution.'}`);
+                alert(`Pipeline connection failed: ${err.message}`);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalBtnHtml;
