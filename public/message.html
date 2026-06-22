@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ComfortXpress Admin | Support Inquiries</title>
+    <title>ComfortXpress Admin | Support Inquiries Desk</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -25,10 +25,9 @@
         .logo span { color: var(--accent); }
         .nav-links { list-style: none; flex-grow: 1; }
         .nav-links a { color: #e2e8f0; text-decoration: none; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
-        .nav-links a:hover { background: rgba(255,255,255,0.05); }
         .nav-links a.active { background: var(--primary); color: white; }
 
-        /* Sidebar User Profile Status Widget */
+        /* Sidebar Profile Status Widget */
         .sidebar-profile { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; }
         .sidebar-profile i { font-size: 2rem; color: #cbd5e1; }
         .profile-info h4 { font-size: 0.9rem; font-weight: 600; }
@@ -42,25 +41,26 @@
 
         .container { padding: 40px; flex-grow: 1; }
         
-        /* Table Section Headings */
-        .section-title { font-size: 1.2rem; color: #1e293b; margin: 10px 0 12px 0; display: flex; align-items: center; gap: 10px; font-weight: 600; }
+        /* Layout Header Section Controls */
+        .feed-header-panel { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .section-title { font-size: 1.2rem; color: #1e293b; display: flex; align-items: center; gap: 10px; font-weight: 600; }
         .section-title span { background: #e2e8f0; font-size: 0.8rem; padding: 2px 8px; border-radius: 20px; color: #475569; }
-
-        /* Table Styling */
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 30px; }
-        th { background: #f1f5f9; padding: 16px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: #475569; font-weight: 600; }
-        td { padding: 16px; border-bottom: 1px solid #e2e8f0; color: #334155; font-size: 0.9rem; vertical-align: top; }
-        tr:hover { background: #f8fafc; }
-
-        .msg-text-block { max-width: 450px; white-space: pre-wrap; font-size: 0.85rem; color: #475569; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; line-height: 1.5; }
-        .badge-new { background: #eff6ff; color: #2563eb; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
-        .no-orders { padding: 20px; text-align: center; color: #94a3b8; background: white; border-radius: 8px; border: 1px dashed #cbd5e1; margin-bottom: 30px; font-size: 0.9rem; }
         
-        .refresh-btn { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; }
+        .refresh-btn { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(245, 130, 31, 0.2); }
         .refresh-btn:hover { opacity: 0.9; }
 
+        /* Table Design Blueprint */
+        .table-wrap-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; padding: 10px; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th { background: #f1f5f9; padding: 16px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: #475569; font-weight: 600; border-radius: 4px; }
+        td { padding: 16px; border-bottom: 1px solid #e2e8f0; color: #334155; font-size: 0.9rem; vertical-align: top; }
+        
+        .badge-new { background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+        .msg-text-block { color: #475569; line-height: 1.5; font-size: 0.85rem; max-width: 450px; word-wrap: break-word; white-space: normal; }
+        .no-orders { padding: 40px; text-align: center; color: #94a3b8; background: white; font-size: 0.9rem; font-weight: 500; }
+
         /* Footer */
-        footer { text-align: center; padding: 20px; color: #94a3b8; font-size: 0.85rem; background: #f8fafc; }
+        footer { text-align: center; padding: 20px; color: #94a3b8; font-size: 0.85rem; background: #f8fafc; margin-top: auto; }
     </style>
 </head>
 <body>
@@ -72,7 +72,7 @@
                 <li><a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
                 <li><a href="live-feed.html"><i class="fas fa-satellite-dish"></i> Rider Requests</a></li>
                 <li><a href="admin.html"><i class="fas fa-lock"></i> Admin</a></li>
-                <li><a href="message.html"><i class="fas fa-comment-alt"></i> Contact Us</a></li>
+                <li><a href="message.html" class="active"><i class="fas fa-comment-alt"></i> Contact Us</a></li>
             </ul>
             
             <div class="sidebar-profile">
@@ -86,40 +86,31 @@
 
         <main class="main-content">
             <header class="top-bar">
-                <h2><i class="fas fa-envelope-open-text"></i> Support Inquiries Desk</h2>
+                <h2><i class="fas fa-comment-alt"></i> Support Inquiries Desk</h2>
                 <button class="logout-btn" onclick="window.location.href='login.html';"><i class="fas fa-sign-out-alt"></i> Logout</button>
             </header>
 
             <div class="container">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <div class="section-title" style="margin: 0;">
-                        <i class="fas fa-mail-bulk" style="color: var(--accent);"></i> Customer Messages 
+                <div class="feed-header-panel">
+                    <div class="section-title">
+                        <i class="fas fa-envelope-open-text" style="color: var(--accent);"></i> Customer Messages 
                         <span id="inquiryCount">0</span>
                     </div>
-                    <button class="refresh-btn" onclick="loadInquiries()">
-                        <i class="fas fa-sync-alt"></i> Refresh Feed
-                    </button>
+                    <button class="refresh-btn" onclick="loadInquiries()"><i class="fas fa-sync-alt"></i> Refresh Feed</button>
                 </div>
 
-                <div id="tableContainer">
-                    <table id="inquiriesTable">
+                <div class="table-wrap-card" id="tableContainer">
+                    <table id="inquiriesTable" style="display: none;">
                         <thead>
                             <tr>
-                                <th style="width: 15%">Date Received</th>
-                                <th style="width: 25%">Sender Details</th>
-                                <th style="width: 20%">Subject Heading</th>
-                                <th style="width: 30%">Message Context</th>
-                                <th style="width: 10%">Status</th>
+                                <th style="width: 15%;">Date Received</th>
+                                <th style="width: 25%;">Sender Details</th>
+                                <th style="width: 20%;">Subject Heading</th>
+                                <th style="width: 30%;">Message Context</th>
+                                <th style="width: 10%;">Status</th>
                             </tr>
                         </thead>
-                        <tbody id="inquiryTableRows">
-                            <tr>
-                                <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">
-                                    <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: 10px; color: var(--accent);"></i>
-                                    <br>Querying live support indexes...
-                                </td>
-                            </tr>
-                        </tbody>
+                        <tbody id="inquiryTableRows"></tbody>
                     </table>
                 </div>
             </div>
@@ -131,77 +122,127 @@
     </div>
 
     <script>
+        // ─── CONFIG ───────────────────────────────────────────────────────────────────
+        const ADMIN_KEY = '79975cbf52d9eb4e0f790f270256a38ab40155e8a18567f71e9b52b77ec98436';
+
+        // ─── SOCKET ──────────────────────────────────────────────────────────────────
         let socket;
         try {
-            socket = io();
+            socket = io({
+                auth: { token: ADMIN_KEY }
+            });
+            socket.emit('joinAdminRoom');
         } catch (e) {
-            console.warn("Socket.io connection initialization failed. Falling back to HTTP workflows.", e);
+            console.warn('Socket.io init failed. Falling back to HTTP polling.', e);
         }
 
+        // ─── FETCH INQUIRIES ─────────────────────────────────────────────────────────
         async function loadInquiries() {
-            const tableBody = document.getElementById('inquiryTableRows');
-            const tableEl = document.getElementById('inquiriesTable');
+            const tableBody   = document.getElementById('inquiryTableRows');
+            const tableEl     = document.getElementById('inquiriesTable');
             const containerEl = document.getElementById('tableContainer');
 
             try {
-                const res = await fetch('/api/admin/inquiries');
-                if (!res.ok) throw new Error('Database pipeline transmission block.');
+                const res = await fetch('/api/admin/inquiries', {
+                    headers: { 'x-admin-key': ADMIN_KEY }
+                });
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
-                
+
                 document.getElementById('inquiryCount').innerText = data.length;
 
-                // Handle Empty States smoothly
+                // Clean out any old error notice boxes before writing rows
+                const oldNotice = document.getElementById('noMsgNotice');
+                if (oldNotice) oldNotice.remove();
+
                 if (data.length === 0) {
                     tableEl.style.display = 'none';
-                    if (!document.getElementById('noMsgNotice')) {
-                        containerEl.innerHTML += `<div id="noMsgNotice" class="no-orders">No digital form inquiries logged in the database repository.</div>`;
-                    }
+                    containerEl.innerHTML += `<div id="noMsgNotice" class="no-orders">No inquiries logged yet.</div>`;
                     return;
                 }
 
-                // If items exist, remove fallback alerts and display the layout table
-                if (document.getElementById('noMsgNotice')) document.getElementById('noMsgNotice').remove();
                 tableEl.style.display = 'table';
-
                 tableBody.innerHTML = data.map(item => {
-                    const dateObj = new Date(item.createdAt || Date.now());
+                    const dateObj     = new Date(item.createdAt || Date.now());
                     const displayDate = dateObj.toLocaleDateString();
                     const displayTime = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    const readBadge   = item.read
+                        ? `<span style="background:#f0fdf4;color:#166534;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;">Read</span>`
+                        : `<span class="badge-new">New</span>`;
 
                     return `
                         <tr>
-                            <td style="white-space: nowrap; font-weight: 600;">
+                            <td style="white-space:nowrap;font-weight:600;">
                                 ${displayDate}<br>
-                                <span style="font-size: 0.8rem; color: #94a3b8;">${displayTime}</span>
+                                <span style="font-size:0.8rem;color:#94a3b8;">${displayTime}</span>
                             </td>
                             <td>
-                                <strong>${item.fullName || 'Anonymous Sender'}</strong><br>
-                                <a href="mailto:${item.emailAddress}" style="color: var(--transit); text-decoration: none; font-size: 0.85rem;">
+                                <strong>${item.fullName || 'Anonymous'}</strong><br>
+                                <a href="mailto:${item.emailAddress}" style="color:var(--transit);text-decoration:none;font-size:0.85rem;">
                                     ${item.emailAddress || 'N/A'}
                                 </a>
                             </td>
-                            <td style="font-weight: 600; color: var(--primary);">${item.msgSubject || 'No Subject'}</td>
+                            <td style="font-weight:600;color:var(--primary);">${item.msgSubject || 'No Subject'}</td>
+                            <td><div class="msg-text-block">${item.messageBody || ''}</div></td>
                             <td>
-                                <div class="msg-text-block">${item.messageBody || 'Empty content text block...'}</div>
+                                ${readBadge}
+                                <br>
+                                ${!item.read ? `
+                                <button onclick="markRead('${item._id}')"
+                                    style="margin-top:6px;font-size:0.75rem;padding:4px 8px;border-radius:4px;border:1px solid #cbd5e1;background:white;cursor:pointer;color:#475569;">
+                                    Mark read
+                                </button>` : ''}
                             </td>
-                            <td><span class="badge-new">New</span></td>
                         </tr>
                     `;
                 }).join('');
 
             } catch (err) {
-                console.error('Fetch error:', err);
-                tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger); padding: 40px; font-weight: 600;">Failed to sync with live web metrics.</td></tr>`;
+                console.error('Inquiry fetch error:', err);
+                tableEl.style.display = 'none';
+                
+                // Keep the structural wrap card but drop clear explicit feedback message
+                if (!document.getElementById('noMsgNotice')) {
+                    containerEl.innerHTML += `
+                        <div id="noMsgNotice" class="no-orders" style="color:var(--danger); font-weight:600;">
+                            ${err.message.includes('401')
+                                ? 'Authentication error — check ADMIN_KEY matches your backend system config.'
+                                : 'Failed to sync with live web metrics. Check server logs.'}
+                        </div>`;
+                }
             }
         }
 
-        // Live Socket listeners for real-time dashboard events
-        if (socket) {
-            socket.on('newInquirySubmitted', () => loadInquiries());
+        // ─── MARK AS READ ─────────────────────────────────────────────────────────────
+        async function markRead(id) {
+            try {
+                const res = await fetch(`/api/admin/inquiries/${id}/read`, {
+                    method: 'PUT', // Fixed from PATCH to match route file
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'x-admin-key': ADMIN_KEY 
+                    }
+                });
+                if (res.ok) {
+                    loadInquiries();
+                } else {
+                    console.error('Failed to update status code:', res.status);
+                }
+            } catch (err) {
+                console.error('markRead error Context:', err);
+            }
         }
 
-        // Periodic safety sync loop every 10 seconds
-        setInterval(loadInquiries, 10000);
+        // ─── REAL-TIME UPDATES ────────────────────────────────────────────────────────
+        if (socket) {
+            socket.on('newInquirySubmitted', () => loadInquiries());
+            socket.on('inquiryDeleted',      () => loadInquiries());
+            socket.on('error', (err) => console.warn('Socket error state:', err));
+        }
+
+        // Fallback safety polling
+        setInterval(loadInquiries, 30000);
         window.onload = loadInquiries;
     </script>
 </body>
