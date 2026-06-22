@@ -1,17 +1,28 @@
 {
   "name": "comfortxpress-logistics",
   "version": "1.0.0",
-  "description": "ComfortXpress Logistics platform with real-time tracking, admin dashboards, and public site.",
+  "description": "ComfortXpress Logistics — real-time intra-city delivery management platform for Lagos.",
   "main": "server.js",
+  "author": "Rufus Ayodele Fakayode",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node --watch server.js"
   },
   "dependencies": {
     "axios": "^1.18.0",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
-    "express": "^4.19.2",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "express-validator": "^7.2.1",
+    "helmet": "^8.0.0",
     "mongoose": "^8.3.1",
+    "morgan": "^1.10.0",
     "socket.io": "^4.7.5"
   }
 }

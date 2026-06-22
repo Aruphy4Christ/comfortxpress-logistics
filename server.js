@@ -1,167 +1,187 @@
+/**
+ * ComfortXpress Logistics — Main Server
+ * Entry point: initialises middleware, database, routes, and WebSocket server.
+ */
+
 require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const http = require('http');
+const crypto = require('crypto'); // Added for request ID generation
+
+// --- Environment variable guard ---
+const REQUIRED_ENV = ['MONGODB_URI', 'ADMIN_SECRET_KEY'];
+const missing = REQUIRED_ENV.filter(key => !process.env[key]);
+if (missing.length > 0) {
+    console.error(`\n❌ Missing required environment variables: ${missing.join(', ')}`);
+    process.exit(1);
+}
+
+const express    = require('express');
+const mongoose   = require('mongoose');
+const http       = require('http');
 const { Server } = require('socket.io');
-const cors = require('cors');
-const Order = require('./models/Order'); //[cite: 5]
-const Inquiry = require('./models/Inquiry'); //[cite: 5]
-const { sendTelegramAlert } = require('./notificationService'); //[cite: 5]
+const cors       = require('cors');
+const helmet     = require('helmet');
+const morgan     = require('morgan');
 
-const app = express();
+const logger        = require('./utils/logger');
+const { apiLimiter } = require('./middleware/rateLimiter');
+const requireAdmin  = require('./middleware/requireAdmin'); 
+
+// Route modules
+const orderRoutes        = require('./routes/orders');
+const trackRoutes        = require('./routes/track');
+const inquiryRoutes      = require('./routes/inquiries');       // Public
+const adminInquiryRoutes = require('./routes/adminInquiries'); // Admin Only
+const Order              = require('./models/Order');
+
+// ─── App & Server Setup ──────────────────────────────────────────────────────
+
+const app    = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*' } }); //[cite: 5]
 
-// Middleware
-app.use(cors()); //[cite: 5]
-app.use(express.json()); //[cite: 5]
-app.use(express.urlencoded({ extended: true })); //[cite: 5]
-app.use(express.static('public')); //[cite: 5]
-
-// Database Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/comfortxpress') //[cite: 5]
-  .then(() => console.log('MongoDB Connected Successfully')) //[cite: 5]
-  .catch(err => console.error('Database Error: ', err)); //[cite: 5]
-
-// --- RESTful API ENDPOINTS ---
-
-// Create a new order
-app.post('/api/orders', async (req, res) => { //[cite: 5]
-    try {
-        const trackingId = req.body.trackingId || ('CX-' + Math.floor(100000 + Math.random() * 900000)); //[cite: 5]
-        
-        const orderPayload = {
-            trackingId,
-            customerName: req.body.customerName || req.body.senderName || "Guest User", //[cite: 5]
-            pickupAddress: req.body.pickupAddress || req.body.collectionPoint || "", //[cite: 5]
-            deliveryAddress: req.body.deliveryAddress || req.body.dropoffAddress || req.body.destinationPoint || "", //[cite: 5]
-            dropoffAddress: req.body.deliveryAddress || req.body.dropoffAddress || req.body.destinationPoint || "", //[cite: 5]
-            packageDetails: req.body.packageDetails || req.body.logisticsType || "Standard Delivery", //[cite: 5]
-            status: req.body.status || "Pending", //[cite: 5]
-            // FIXED: Handles source vs origin data mismatch mapping
-            origin: req.body.origin || req.body.source || "customer" 
-        };
-
-        const newOrder = new Order(orderPayload); //[cite: 5]
-        await newOrder.save(); //[cite: 5]
-        
-        io.emit('newOrderCreated', newOrder); //[cite: 5]
-        sendTelegramAlert(newOrder); //[cite: 5]
-        
-        console.log(`Order created [Origin: ${orderPayload.origin}]: ${trackingId}`); //[cite: 5]
-        res.status(201).json({ message: 'Order Created', trackingId }); //[cite: 5]
-    } catch (error) {
-        res.status(500).json({ error: error.message }); //[cite: 5]
-    }
+// --- Request ID Middleware ---
+app.use((req, res, next) => {
+    req.id = crypto.randomUUID();
+    // Setting header so you can see it in browser Network tab
+    res.setHeader('X-Request-Id', req.id);
+    next();
 });
 
-// Get all orders
-app.get('/api/orders', async (req, res) => { //[cite: 5]
-    try {
-        const orders = await Order.find().sort({ createdAt: -1 }); //[cite: 5]
-        res.json(orders); //[cite: 5]
-    } catch (error) {
-        res.status(500).json({ error: error.message }); //[cite: 5]
-    }
+const allowedOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',').map(o => o.trim())
+    : ['http://localhost:3000', 'http://localhost:5500'];
+
+const io = new Server(server, {
+    cors: { origin: allowedOrigins, methods: ['GET', 'POST'] },
+    transports: ['websocket', 'polling']
 });
 
-// Update order status
-app.put('/api/orders/:id', async (req, res) => { //[cite: 5]
-    try {
-        const updatedOrder = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true }); //[cite: 5]
-        if (updatedOrder) { //[cite: 5]
-            io.emit('orderUpdated', updatedOrder); //[cite: 5]
-            io.to(updatedOrder.trackingId).emit('statusChanged', updatedOrder); //[cite: 5]
+app.set('io', io);
+
+// ─── Security & Middleware ───────────────────────────────────────────────────
+
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc:  ["'self'", "'unsafe-inline'"],
+            styleSrc:   ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+            fontSrc:    ["'self'", 'https://fonts.gstatic.com'],
+            imgSrc:     ["'self'", 'data:'],
+            connectSrc: ["'self'", 'wss:', 'ws:']
         }
-        res.json(updatedOrder); //[cite: 5]
-    } catch (error) {
-        res.status(500).json({ error: error.message }); //[cite: 5]
     }
+}));
+
+app.use(cors({ origin: allowedOrigins, credentials: true }));
+app.use(express.json({ limit: '50kb' }));
+app.use(express.urlencoded({ extended: true, limit: '50kb' }));
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+// Updated static asset delivery with cache control rules
+app.use(express.static('public', {
+    maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0,
+    etag: true
+}));
+
+app.use('/api', apiLimiter);
+
+// ─── Database Connection ──────────────────────────────────────────────────────
+
+mongoose.connect(process.env.MONGODB_URI, {
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+})
+.then(() => {
+    logger.info('MongoDB Atlas connected successfully.');
+})
+.catch(err => {
+    logger.error('Database connection failed: ' + err.message);
+    process.exit(1);
 });
 
-// --- SUPPORT INQUIRY ENDPOINTS ---
+// ─── API Routes ───────────────────────────────────────────────────────────────
 
-// Submit a new inquiry from Contact Page
-app.post('/api/admin/inquiries', async (req, res) => { //[cite: 5]
+app.use('/api/orders',          orderRoutes);
+app.use('/api/track',           trackRoutes);
+app.use('/api/inquiries',       inquiryRoutes); 
+app.use('/api/admin/inquiries', requireAdmin, adminInquiryRoutes); 
+
+app.get('/api/health', async (req, res) => {
     try {
-        const { fullName, emailAddress, msgSubject, messageBody } = req.body; //[cite: 5]
-
-        if (!fullName || !emailAddress || !msgSubject || !messageBody) { //[cite: 5]
-            return res.status(400).json({ error: 'Missing required payload parameters fields.' }); //[cite: 5]
-        }
-
-        const newInquiry = new Inquiry({ //[cite: 5]
-            fullName, //[cite: 5]
-            emailAddress, //[cite: 5]
-            msgSubject, //[cite: 5]
-            messageBody //[cite: 5]
-        });
-
-        await newInquiry.save(); //[cite: 5]
-
-        io.emit('newInquirySubmitted', newInquiry); //[cite: 5]
-
-        console.log(`📩 New message logged from: ${fullName}`); //[cite: 5]
-        res.status(201).json({ message: 'Inquiry written to database successfully.' }); //[cite: 5]
-    } catch (error) {
-        console.error("Database Insertion Error Handler:", error); //[cite: 5]
-        res.status(500).json({ error: error.message || 'Failed writing data to Mongo database collection cluster.' }); //[cite: 5]
+        await mongoose.connection.db.admin().ping();
+        res.json({ status: 'ok', db: 'connected', timestamp: new Date().toISOString() });
+    } catch (err) {
+        res.status(503).json({ status: 'degraded', db: 'unreachable', error: err.message });
     }
 });
 
-// Retrieve inquiries for Admin Desk Dashboard View
-app.get('/api/admin/inquiries', async (req, res) => { //[cite: 5]
-    try {
-        const inquiries = await Inquiry.find().sort({ createdAt: -1 }); //[cite: 5]
-        res.json(inquiries); //[cite: 5]
-    } catch (error) {
-        res.status(500).json({ error: error.message }); //[cite: 5]
-    }
+app.use((req, res) => res.status(404).json({ error: 'Route not found' }));
+
+// ─── Global Error Handler ─────────────────────────────────────────────────────
+
+app.use((err, req, res, next) => {
+    // You can now include the request ID in your logs!
+    logger.error(`[ID: ${req.id}] ${err.stack || err.message}`);
+    const status = err.status || err.statusCode || 500;
+    res.status(status).json({
+        error: process.env.NODE_ENV === 'production'
+          ? 'Something went wrong'
+          : err.message
+    });
 });
 
-// --- EXISTING TRACKING ENDPOINTS ---
-app.get('/api/track/:trackingId', async (req, res) => { //[cite: 5]
-    try {
-        const order = await Order.findOne({ trackingId: { $regex: new RegExp("^" + req.params.trackingId.trim() + "$", "i") } }); //[cite: 5]
-        if (!order) return res.status(404).json({ message: 'Tracking ID not found' }); //[cite: 5]
-        res.json(order); //[cite: 5]
-    } catch (error) {
-        res.status(500).json({ error: error.message }); //[cite: 5]
-    }
-});
+// ─── WebSocket Logic ──────────────────────────────────────────────────────────
 
-app.get('/api/orders/:trackingId', async (req, res) => { //[cite: 5]
-    try {
-        const order = await Order.findOne({ trackingId: { $regex: new RegExp("^" + req.params.trackingId.trim() + "$", "i") } }); //[cite: 5]
-        if (!order) return res.status(404).json({ message: 'Order not found' }); //[cite: 5]
-        res.json(order); //[cite: 5]
-    } catch (error) {
-        res.status(500).json({ error: error.message }); //[cite: 5]
-    }
-});
-
-// --- WEBSOCKETS ---
-io.on('connection', (socket) => { //[cite: 5]
-    socket.on('joinTrackingRoom', (trackingId) => { //[cite: 5]
-        if (trackingId) socket.join(trackingId.trim()); //[cite: 5]
+io.on('connection', (socket) => {
+    socket.on('joinTrackingRoom', (trackingId) => {
+        if (trackingId) socket.join(trackingId.trim().toUpperCase());
     });
 
-    socket.on('updateOrderStatus', async ({ trackingId, newStatus }) => { //[cite: 5]
+    socket.on('joinAdminRoom', (adminToken) => {
+        if (adminToken === process.env.ADMIN_SECRET_KEY) {
+            socket.join('admin-room');
+        }
+    });
+
+    socket.on('updateOrderStatus', async ({ trackingId, newStatus, adminToken }) => {
+        if (adminToken !== process.env.ADMIN_SECRET_KEY) {
+            socket.emit('updateError', { message: 'Unauthorized: Invalid Admin Token.' });
+            return;
+        }
+
         try {
-            const updatedOrder = await Order.findOneAndUpdate( //[cite: 5]
-                { trackingId: { $regex: new RegExp("^" + trackingId.trim() + "$", "i") } }, //[cite: 5]
-                { status: newStatus }, //[cite: 5]
-                { new: true } //[cite: 5]
+            const updatedOrder = await Order.findOneAndUpdate(
+                { trackingId: { $regex: new RegExp('^' + trackingId.trim() + '$', 'i') } },
+                { status: newStatus },
+                { new: true }
             );
-            if (updatedOrder) { //[cite: 5]
-                io.emit('orderUpdated', updatedOrder); //[cite: 5]
-                io.to(updatedOrder.trackingId).emit('statusChanged', updatedOrder); //[cite: 5]
+            if (updatedOrder) {
+                io.to(updatedOrder.trackingId).emit('statusChanged', updatedOrder);
+                io.to('admin-room').emit('orderUpdated', updatedOrder);
+            } else {
+                socket.emit('updateError', { message: 'Order not found.' });
             }
-        } catch (err) { console.error(err); } //[cite: 5]
+        } catch (err) {
+            logger.error('Socket update failed:', err.message);
+            socket.emit('updateError', { message: 'Server error during update.' });
+        }
     });
-
-    socket.on('disconnect', () => console.log('User disconnected')); //[cite: 5]
 });
 
-const PORT = process.env.PORT || 3000; //[cite: 5]
-server.listen(PORT, () => console.log(`🚀 ComfortXpress backend engine running on port ${PORT}`)); //[cite: 5]
+// ─── Start Server ─────────────────────────────────────────────────────────────
+
+const PORT = parseInt(process.env.PORT) || 3000;
+server.listen(PORT, () => {
+    logger.info(`Server running on port ${PORT}`);
+});
+
+// ─── Graceful Shutdown ────────────────────────────────────────────────────────
+
+process.on('SIGTERM', shutdown);
+process.on('SIGINT',  shutdown);
+
+async function shutdown() {
+    logger.info('Shutting down gracefully...');
+    await mongoose.connection.close();
+    server.close(() => process.exit(0));
+}
