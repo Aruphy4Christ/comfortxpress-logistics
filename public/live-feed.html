@@ -96,7 +96,6 @@
             <li><a href="live-feed.html" class="active"><i class="fas fa-satellite-dish"></i> Rider Requests</a></li>
             <li><a href="admin.html"><i class="fas fa-lock"></i> Admin</a></li>
             <li><a href="message.html"><i class="fas fa-comment-alt"></i> Contact Us</a></li>
-
         </ul>
         <div class="admin-profile">
             <i class="fas fa-user-circle fa-2x"></i>
@@ -110,7 +109,7 @@
     <main class="main-content">
         <header class="top-bar">
             <h2><i class="fas fa-satellite-dish" style="margin-right: 10px;"></i> Live Rider Requests</h2>
-            <button class="logout-btn" onclick="window.location.href='login.html';">
+            <button class="logout-btn" onclick="logout()">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </button>
         </header>
@@ -145,6 +144,17 @@
     </main>
 
     <script>
+        (function() {
+            if (localStorage.getItem('cx_session') !== 'authenticated_token') {
+                window.location.replace('login.html');
+            }
+        })();
+
+        function logout() {
+            localStorage.removeItem('cx_session');
+            window.location.replace('login.html');
+        }
+
         async function render() {
             try {
                 const res = await fetch('/api/orders');
@@ -160,7 +170,6 @@
                 let activeCount = 0;
                 let completedCount = 0;
 
-                // CRITICAL EXCLUSION STEP: Extract customer records, safely accounting for legacy documents
                 const customerRequests = orders.filter(order => order.origin === 'customer' || !order.origin);
 
                 if (customerRequests.length === 0) {

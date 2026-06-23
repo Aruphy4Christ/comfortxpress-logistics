@@ -98,7 +98,9 @@
         <main class="main-content">
             <header class="top-bar">
                 <h2><i class="fas fa-lock"></i> Admin Control Panel</h2>
-                <button class="logout-btn" onclick="window.location.href='login.html';"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
             </header>
 
             <div class="container">
@@ -128,7 +130,8 @@
                                 <th>Logistics</th>
                                 <th>Tracking ID</th>
                                 <th>Customer</th>
-                                <th>Channel</th> <th>Route</th>
+                                <th>Channel</th> 
+                                <th>Route</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -148,7 +151,8 @@
                                 <th>Logistics</th>
                                 <th>Tracking ID</th>
                                 <th>Customer</th>
-                                <th>Channel</th> <th>Route</th>
+                                <th>Channel</th> 
+                                <th>Route</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -165,6 +169,17 @@
     </div>
 
     <script>
+        (function() {
+            if (localStorage.getItem('cx_session') !== 'authenticated_token') {
+                window.location.replace('login.html');
+            }
+        })();
+
+        function logout() {
+            localStorage.removeItem('cx_session');
+            window.location.replace('login.html');
+        }
+
         let socket;
         try {
             socket = io();
@@ -198,28 +213,36 @@
                     const routeFrom = order.pickupAddress || order.collectionPoint || 'N/A';
                     const routeTo = order.dropoffAddress || order.deliveryAddress || order.destinationPoint || 'N/A';
 
-                    // Restructured badges out of inline text chains into independent nodes
                     let originTagHtml = '';
                     if (order.origin === 'customer') {
                         originTagHtml = `<span class="tag-origin tag-customer"><i class="fas fa-laptop"></i> Client App</span>`;
                     } else {
-                        originTagHtml = `<span class="tag-origin tag-admin"><i class="fas fa-user-shield"></i> Desk Entry</span>`;
+                        originTagHtml = `<span class="tag-origin tag-admin"><i class="fas fa-user-shield"></i> Admin Entry</span>`;
                     }
 
-                    const rowHtml = `<tr>
-                        <td><strong>${pkgType}</strong></td>
-                        <td><strong>${trackId}</strong></td>
-                        <td>${custName}</td>
-                        <td>${originTagHtml}</td> <td>${routeFrom} &rarr; ${routeTo}</td>
-                        <td><span class="badge ${badgeClass}">${order.status || 'Pending'}</span></td>
-                        <td>
-                            <select class="action-dropdown" onchange="updateStatus('${order._id}', this.value)">
-                                <option value="Pending" ${order.status==='Pending'?'selected':''}>Pending</option>
-                                <option value="In Transit" ${order.status==='In Transit'?'selected':''}>In Transit</option>
-                                <option value="Delivered" ${order.status==='Delivered'?'selected':''}>Delivered</option>
-                            </select>
-                        </td>
-                    </tr>`;
+                    const actionDropdown = `
+                        <select class="action-dropdown" onchange="updateStatus('${order._id}', this.value)">
+                            <option value="" disabled selected>Update Status...</option>
+                            <option value="Pending">Pending</option>
+                            <option value="In Transit">In Transit</option>
+                            <option value="Delivered">Delivered</option>
+                        </select>
+                    `;
+
+                    const rowHtml = `
+                        <tr>
+                            <td style="font-weight:600;">${pkgType}</td>
+                            <td style="font-family:monospace; color:var(--transit);">${trackId}</td>
+                            <td><strong>${custName}</strong></td>
+                            <td>${originTagHtml}</td>
+                            <td style="font-size: 0.8rem; color: #64748b;">
+                                <div><i class="fas fa-arrow-up" style="color:var(--success); margin-right:4px;"></i>${routeFrom}</div>
+                                <div style="margin-top:4px;"><i class="fas fa-arrow-down" style="color:var(--danger); margin-right:4px;"></i>${routeTo}</div>
+                            </td>
+                            <td><span class="badge ${badgeClass}">${order.status || 'Pending'}</span></td>
+                            <td>${actionDropdown}</td>
+                        </tr>
+                    `;
 
                     if (order.status === 'Delivered') {
                         deliveredTbody.innerHTML += rowHtml;
@@ -233,22 +256,28 @@
                 document.getElementById('activeCount').innerText = activeCount;
                 document.getElementById('completedCount').innerText = completedCount;
 
-                document.getElementById('activeOrdersTable').style.display = activeCount === 0 ? 'none' : 'table';
-                if(activeCount === 0 && !document.getElementById('noActiveMsg')) {
-                    document.getElementById('activeContainer').innerHTML += `<div id="noActiveMsg" class="no-orders">No active operational dispatches found.</div>`;
-                } else if (activeCount > 0 && document.getElementById('noActiveMsg')) {
-                    document.getElementById('noActiveMsg').remove();
+                if(activeCount === 0) {
+                    activeTbody.innerHTML = '<tr><td colspan="7"><div class="no-orders">No active shipments in the network.</div></td></tr>';
                 }
-
-                document.getElementById('deliveredOrdersTable').style.display = completedCount === 0 ? 'none' : 'table';
-                if(completedCount === 0 && !document.getElementById('noDeliveredMsg')) {
-                    document.getElementById('completedContainer').innerHTML += `<div id="noDeliveredMsg" class="no-orders">No historical entries found.</div>`;
-                } else if (completedCount > 0 && document.getElementById('noDeliveredMsg')) {
-                    document.getElementById('noDeliveredMsg').remove();
+                if(completedCount === 0) {
+                    deliveredTbody.innerHTML = '<tr><td colspan="7"><div class="no-orders">No completed deliveries on record.</div></td></tr>';
                 }
 
             } catch (err) {
-                console.error("Error drawing operational layout:", err);
+                console.error("Failed to load admin panel data:", err);
+            }
+        }
+
+        async function updateStatus(id, newStatus) {
+            try {
+                const res = await fetch(`/api/orders/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                if(res.ok) fetchOrders();
+            } catch (err) {
+                console.error('Status update failed:', err);
             }
         }
 
@@ -259,60 +288,35 @@
             const dropoffAddress = document.getElementById('dropoff').value;
 
             if(!customerName || !pickupAddress || !dropoffAddress) {
-                return alert('Please completely satisfy all form input fields.');
+                alert('Please fill out all address and name fields.');
+                return;
             }
-
-            const trackingId = "CX-ADM" + Math.floor(Math.random() * 90000 + 10000);
-
-            const data = { 
-                trackingId,
-                customerName, 
-                packageDetails, 
-                pickupAddress, 
-                dropoffAddress, 
-                status: "Pending",
-                origin: "admin" 
-            };
 
             try {
                 const res = await fetch('/api/orders', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify({
+                        customerName, packageDetails, pickupAddress, dropoffAddress, origin: 'admin', status: 'Pending'
+                    })
                 });
-
                 if(res.ok) {
                     document.getElementById('cName').value = '';
                     document.getElementById('pickup').value = '';
                     document.getElementById('dropoff').value = '';
                     fetchOrders();
-                } else {
-                    alert('Submission error encountered writing record pipeline.');
                 }
             } catch (err) {
-                console.error(err);
-            }
-        }
-
-        async function updateStatus(orderId, newStatus) {
-            try {
-                const res = await fetch(`/api/orders/${orderId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: newStatus })
-                });
-                if(res.ok) fetchOrders();
-            } catch (err) {
-                console.error("Update error context encountered:", err);
+                console.error('Order creation failed:', err);
             }
         }
 
         if (socket) {
-            socket.on('newOrderCreated', () => fetchOrders());
-            socket.on('orderUpdated', () => fetchOrders());
+            socket.on('newOrder', () => fetchOrders());
+            socket.on('statusUpdate', () => fetchOrders());
         }
 
-        setInterval(fetchOrders, 5000);
+        setInterval(fetchOrders, 30000);
         window.onload = fetchOrders;
     </script>
 </body>

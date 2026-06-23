@@ -16,6 +16,7 @@
             --text-light: #e2e8f0;
             --white: #ffffff;
             --success: #22c55e;
+            --danger: #ef4444;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -37,6 +38,10 @@
         /* Main Content Area */
         .main-content { flex-grow: 1; display: flex; flex-direction: column; }
         .top-bar { background: var(--white); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
+        .logout-btn { background: #fee2e2; color: #dc2626; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: 0.2s; }
+        .logout-btn:hover { background: #fecaca; }
+
         .container { padding: 40px; flex-grow: 1; }
 
         /* Stats Grid */
@@ -55,7 +60,7 @@
 </head>
 <body>
 
-    <div id="welcome-toast"><strong>Admin Connected.</strong> Welcome to the Core.</div>
+    <div id="welcome-toast">Admin Connected. Welcome to the Core.</div>
 
     <nav class="sidebar">
         <div class="logo">Comfort<span>Xpress</span></div>
@@ -77,7 +82,9 @@
     <main class="main-content">
         <header class="top-bar">
             <h2>Dashboard Overview</h2>
-            <button onclick="localStorage.removeItem('cx_session'); window.location.href='login.html';" style="padding: 8px 16px; border: none; background: #fee2e2; color: #dc2626; border-radius: 6px; cursor: pointer;">Logout</button>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
         </header>
 
         <div class="container">
@@ -108,7 +115,16 @@
     </main>
 
     <script>
-        if(localStorage.getItem("cx_session") !== "authenticated_token") window.location.href = "login.html";
+        (function() {
+            if (localStorage.getItem('cx_session') !== 'authenticated_token') {
+                window.location.replace('login.html');
+            }
+        })();
+
+        function logout() {
+            localStorage.removeItem('cx_session');
+            window.location.replace('login.html');
+        }
 
         window.onload = () => {
             const toast = document.getElementById('welcome-toast');
