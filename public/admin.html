@@ -179,7 +179,7 @@
 
         async function fetchOrders() {
             try {
-                const res = await fetch('/api/orders');
+                const res = await fetch('/api/orders', { headers: { 'x-admin-key': ADMIN_KEY } });
                 if (!res.ok) throw new Error('Backend synchronization failure.');
                 const orders = await res.json();
 
@@ -264,7 +264,7 @@
             try {
                 const res = await fetch('/api/orders', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
                     body: JSON.stringify({ trackingId, customerName, packageDetails, pickupAddress, dropoffAddress, status: 'Pending', origin: 'admin' })
                 });
                 if (res.ok) {
@@ -284,7 +284,7 @@
             try {
                 const res = await fetch(`/api/orders/${orderId}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
                     body: JSON.stringify({ status: newStatus })
                 });
                 if (res.ok) fetchOrders();

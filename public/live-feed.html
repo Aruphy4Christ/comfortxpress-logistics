@@ -143,7 +143,7 @@
 
         async function render() {
             try {
-                const res = await fetch('/api/orders');
+                const res = await fetch('/api/orders', { headers: { 'x-admin-key': ADMIN_KEY } });
                 if (!res.ok) throw new Error('Could not retrieve backend orders collection.');
                 const orders = await res.json();
 
