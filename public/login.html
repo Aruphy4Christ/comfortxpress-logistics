@@ -38,105 +38,27 @@
             animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        .brand-title {
-            font-size: 2rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            color: var(--primary-blue);
-            margin-bottom: 8px;
-        }
-
-        .brand-title span {
-            color: var(--accent-orange);
-        }
-
-        .subtitle {
-            color: var(--text-muted);
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 35px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+        .brand-title { font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; color: var(--primary-blue); margin-bottom: 8px; }
+        .brand-title span { color: var(--accent-orange); }
+        .subtitle { color: var(--text-muted); font-size: 1rem; font-weight: 600; margin-bottom: 35px; text-transform: uppercase; letter-spacing: 1px; }
 
         #loginErrorMessage {
-            background-color: #fee2e2;
-            color: #dc2626;
-            border: 2px solid #fecaca;
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 24px;
-            display: none;
-            text-align: left;
-            box-sizing: border-box;
+            background-color: #fee2e2; color: #dc2626; border: 2px solid #fecaca;
+            padding: 12px 16px; border-radius: 12px; font-size: 0.9rem; font-weight: 600; 
+            margin-bottom: 24px; display: none; text-align: left;
         }
 
-        .form-group {
-            margin-bottom: 24px;
-            text-align: left;
-        }
+        .form-group { margin-bottom: 24px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #334155; font-size: 0.9rem; }
+        .form-control { width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; font-size: 1rem; color: var(--dark-slate); transition: all 0.3s ease; }
+        .form-control:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 4px rgba(22, 57, 97, 0.1); outline: none; }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #334155;
-            font-size: 0.9rem;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            box-sizing: border-box;
-            font-size: 1rem;
-            font-family: inherit;
-            color: var(--dark-slate);
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus {
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 4px rgba(22, 57, 97, 0.1);
-            outline: none;
-        }
-
-        .btn-submit {
-            background: linear-gradient(135deg, var(--accent-orange) 0%, #e06f12 100%);
-            color: var(--white);
-            border: none;
-            width: 100%;
-            padding: 16px;
-            cursor: pointer;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 1rem;
-            box-shadow: 0 10px 20px rgba(245, 130, 31, 0.25);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            margin-top: 10px;
-        }
-
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 25px rgba(245, 130, 31, 0.35);
-        }
-
-        .btn-submit:active {
-            transform: translateY(0);
-        }
+        .btn-submit { background: linear-gradient(135deg, var(--accent-orange) 0%, #e06f12 100%); color: var(--white); border: none; width: 100%; padding: 16px; cursor: pointer; border-radius: 12px; font-weight: 700; font-size: 1rem; box-shadow: 0 10px 20px rgba(245, 130, 31, 0.25); transition: all 0.3s ease; }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 15px 25px rgba(245, 130, 31, 0.35); }
 
         @keyframes cardEntrance {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.96);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+            from { opacity: 0; transform: translateY(30px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
     </style>
 </head>
@@ -151,7 +73,7 @@
         <form id="loginForm">
             <div class="form-group">
                 <label for="username">Operator Security ID</label>
-                <input type="text" id="username" class="form-control" placeholder="Enter Admin Username" autocomplete="username">
+                <input type="text" id="username" class="form-control" placeholder="Enter Admin Username" required autocomplete="username">
             </div>
             <div class="form-group">
                 <label for="securePassphraseField">Secure Passphrase</label>
@@ -165,6 +87,7 @@
         async function handleLogin(event) {
             event.preventDefault();
             
+            const usernameInput = document.getElementById('username').value;
             const passwordInput = document.getElementById('securePassphraseField').value;
             const errorMessageEl = document.getElementById('loginErrorMessage');
             
@@ -172,7 +95,11 @@
                 const res = await fetch('/api/admin/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ passphrase: passwordInput })
+                    // FIXED: Now including both username and passphrase
+                    body: JSON.stringify({ 
+                        username: usernameInput,
+                        passphrase: passwordInput 
+                    })
                 });
 
                 const data = await res.json();
@@ -181,24 +108,16 @@
                     throw new Error(data.error || 'Authentication rejected.');
                 }
 
-                // Safely store the signed JWT authorization token
                 localStorage.setItem('cx_session', data.token);
-                
-                // Matches your original app dashboard view file structure cleanly
                 window.location.replace('dashboard.html');
 
             } catch (err) {
                 console.error('Login process error:', err);
-                if (errorMessageEl) {
-                    errorMessageEl.innerText = err.message;
-                    errorMessageEl.style.display = 'block';
-                } else {
-                    alert(err.message);
-                }
+                errorMessageEl.innerText = err.message;
+                errorMessageEl.style.display = 'block';
             }
         }
 
-        // Binds directly to the form submission lifestyle event cleanly
         document.getElementById('loginForm').addEventListener('submit', handleLogin);
     </script>
 </body>
