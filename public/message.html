@@ -82,7 +82,6 @@
         <main class="main-content">
             <header class="top-bar">
                 <h2><i class="fas fa-comment-alt"></i> Support Inquiries Desk</h2>
-                <!-- FIX: was only redirecting, never clearing session token -->
                 <button class="logout-btn" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
@@ -118,29 +117,24 @@
     </div>
 
     <script>
-        // ─── SESSION GUARD ────────────────────────────────────────────────────────────
-        (function () {
-            if (localStorage.getItem('cx_session') !== 'authenticated_token') {
-                window.location.replace('login.html');
-            }
-        })();
+        // ─── SESSION RETRIEVAL & GUARD ───────────────────────────────────────────────
+        const token = localStorage.getItem('cx_session');
+        if (!token) {
+            window.location.replace('login.html');
+        }
 
         // ─── LOGOUT ───────────────────────────────────────────────────────────────────
-        // FIX: old button only redirected — never cleared the token
         function logout() {
             localStorage.removeItem('cx_session');
             window.location.replace('login.html');
         }
 
-        // ─── CONFIG ───────────────────────────────────────────────────────────────────
-        const ADMIN_KEY = '79975cbf52d9eb4e0f790f270256a38ab40155e8a18567f71e9b52b77ec98436';
-
-        // ─── SOCKET ──────────────────────────────────────────────────────────────────
-        // FIX: was io() with no auth — socket never joined admin-room
+        // ─── SOCKET AUTHENTICATION ────────────────────────────────────────────────────
         let socket;
         try {
-            socket = io({ auth: { token: ADMIN_KEY } });
-            socket.emit('joinAdminRoom');
+            socket = io();
+            // Pass the cryptographically signed JWT token to join the secure admin-room
+            socket.emit('joinAdminRoom', token);
         } catch (e) {
             console.warn('Socket.io init failed. Falling back to HTTP polling.', e);
         }
@@ -153,16 +147,23 @@
 
             try {
                 const res = await fetch('/api/admin/inquiries', {
-                    headers: { 'x-admin-key': ADMIN_KEY }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
 
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                // Clear outdated authorization failure screens if present
+                const oldNotice = document.getElementById('noMsgNotice');
+                if (oldNotice) oldNotice.remove();
+
+                if (res.status === 401 || res.status === 403) {
+                    alert('Session credentials expired or invalid security clearance.');
+                    logout();
+                    return;
+                }
+
+                if (!res.ok) throw new Error(`HTTP Error Status: ${res.status}`);
                 const data = await res.json();
 
                 document.getElementById('inquiryCount').innerText = data.length;
-
-                const oldNotice = document.getElementById('noMsgNotice');
-                if (oldNotice) oldNotice.remove();
 
                 if (data.length === 0) {
                     tableEl.style.display = 'none';
@@ -211,9 +212,7 @@
                 if (!document.getElementById('noMsgNotice')) {
                     containerEl.innerHTML += `
                         <div id="noMsgNotice" class="no-orders" style="color:var(--danger);font-weight:600;">
-                            ${err.message.includes('401')
-                                ? 'Authentication error — check ADMIN_KEY matches your backend config.'
-                                : 'Failed to sync. Check server logs.'}
+                            Failed to sync support data matrix. Verify security channels or check terminal logs.
                         </div>`;
                 }
             }
@@ -223,13 +222,23 @@
         async function markRead(id) {
             try {
                 const res = await fetch(`/api/admin/inquiries/${id}/read`, {
-                    method: 'PATCH',  // FIX: was 'PUT' — route is router.patch()
-                    headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY }
+                    method: 'PATCH',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'Authorization': `Bearer ${token}` 
+                    }
                 });
+                
+                if (res.status === 401 || res.status === 403) {
+                    alert('Session expired. Please log in again.');
+                    logout();
+                    return;
+                }
+
                 if (res.ok) loadInquiries();
-                else console.error('markRead failed:', res.status);
+                else console.error('markRead system failure status:', res.status);
             } catch (err) {
-                console.error('markRead error:', err);
+                console.error('markRead exception:', err);
             }
         }
 
@@ -237,7 +246,7 @@
         if (socket) {
             socket.on('newInquirySubmitted', () => loadInquiries());
             socket.on('inquiryDeleted',      () => loadInquiries());
-            socket.on('error', (err) => console.warn('Socket error:', err));
+            socket.on('error', (err) => console.warn('Socket exception context:', err));
         }
 
         setInterval(loadInquiries, 30000);

@@ -4,10 +4,11 @@
  */
 
 require('dotenv').config();
-const crypto = require('crypto'); // Added for request ID generation
+const crypto = require('crypto'); 
+const jwt = require('jsonwebtoken'); // Added for JWT operations
 
 // --- Environment variable guard ---
-const REQUIRED_ENV = ['MONGODB_URI', 'ADMIN_SECRET_KEY'];
+const REQUIRED_ENV = ['MONGODB_URI', 'ADMIN_SECRET_KEY', 'JWT_SECRET']; // Added JWT_SECRET
 const missing = REQUIRED_ENV.filter(key => !process.env[key]);
 if (missing.length > 0) {
     console.error(`\n❌ Missing required environment variables: ${missing.join(', ')}`);
@@ -22,7 +23,7 @@ const cors       = require('cors');
 const helmet     = require('helmet');
 const morgan     = require('morgan');
 
-const logger        = require('./utils/logger');
+const logger         = require('./utils/logger');
 const { apiLimiter } = require('./middleware/rateLimiter');
 const requireAdmin  = require('./middleware/requireAdmin'); 
 
@@ -41,7 +42,6 @@ const server = http.createServer(app);
 // --- Request ID Middleware ---
 app.use((req, res, next) => {
     req.id = crypto.randomUUID();
-    // Setting header so you can see it in browser Network tab
     res.setHeader('X-Request-Id', req.id);
     next();
 });
@@ -77,7 +77,6 @@ app.use(express.json({ limit: '50kb' }));
 app.use(express.urlencoded({ extended: true, limit: '50kb' }));
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
-// Updated static asset delivery with cache control rules
 app.use(express.static('public', {
     maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0,
     etag: true
@@ -101,6 +100,18 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 // ─── API Routes ───────────────────────────────────────────────────────────────
 
+// Admin Authorization Token Endpoint
+app.post('/api/admin/login', (req, res) => {
+    const { username, password } = req.body;
+
+    if (username === 'admin' && password === process.env.ADMIN_SECRET_KEY) {
+        const token = jwt.sign({ role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        return res.json({ success: true, token });
+    }
+
+    return res.status(401).json({ error: 'Invalid security clearance.' });
+});
+
 app.use('/api/orders',          orderRoutes);
 app.use('/api/track',           trackRoutes);
 app.use('/api/inquiries',       inquiryRoutes); 
@@ -120,7 +131,6 @@ app.use((req, res) => res.status(404).json({ error: 'Route not found' }));
 // ─── Global Error Handler ─────────────────────────────────────────────────────
 
 app.use((err, req, res, next) => {
-    // You can now include the request ID in your logs!
     logger.error(`[ID: ${req.id}] ${err.stack || err.message}`);
     const status = err.status || err.statusCode || 500;
     res.status(status).json({
@@ -137,15 +147,30 @@ io.on('connection', (socket) => {
         if (trackingId) socket.join(trackingId.trim().toUpperCase());
     });
 
+    // Updated to verify JWT signatures securely
     socket.on('joinAdminRoom', (adminToken) => {
-        if (adminToken === process.env.ADMIN_SECRET_KEY) {
-            socket.join('admin-room');
+        try {
+            if (adminToken) {
+                const verified = jwt.verify(adminToken, process.env.JWT_SECRET);
+                if (verified && verified.role === 'admin') {
+                    socket.join('admin-room');
+                }
+            }
+        } catch (err) {
+            logger.error('Socket room registration rejected: ' + err.message);
         }
     });
 
+    // Updated to use JWT signature extraction for dispatch controls
     socket.on('updateOrderStatus', async ({ trackingId, newStatus, adminToken }) => {
-        if (adminToken !== process.env.ADMIN_SECRET_KEY) {
-            socket.emit('updateError', { message: 'Unauthorized: Invalid Admin Token.' });
+        try {
+            const verified = jwt.verify(adminToken, process.env.JWT_SECRET);
+            if (!verified || verified.role !== 'admin') {
+                socket.emit('updateError', { message: 'Unauthorized: Invalid token structures.' });
+                return;
+            }
+        } catch (err) {
+            socket.emit('updateError', { message: 'Unauthorized: Session credentials expired.' });
             return;
         }
 
@@ -162,7 +187,7 @@ io.on('connection', (socket) => {
                 socket.emit('updateError', { message: 'Order not found.' });
             }
         } catch (err) {
-            logger.error('Socket update failed:', err.message);
+            logger.error('Socket update failed: ' + err.message);
             socket.emit('updateError', { message: 'Server error during update.' });
         }
     });
