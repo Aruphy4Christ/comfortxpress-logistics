@@ -181,11 +181,11 @@
                     throw new Error(data.error || 'Authentication rejected.');
                 }
 
-                // Save the newly minted cryptographically signed JWT into session storage
+                // Safely store the signed JWT authorization token
                 localStorage.setItem('cx_session', data.token);
                 
-                // Authorization matrix confirmed -> route user to support desk terminal
-                window.location.replace('message.html');
+                // Matches your original app dashboard view file structure cleanly
+                window.location.replace('dashboard.html');
 
             } catch (err) {
                 console.error('Login process error:', err);
@@ -198,7 +198,7 @@
             }
         }
 
-        // Attach to your form submission handling structure
+        // Binds directly to the form submission lifestyle event cleanly
         document.getElementById('loginForm').addEventListener('submit', handleLogin);
     </script>
 </body>
