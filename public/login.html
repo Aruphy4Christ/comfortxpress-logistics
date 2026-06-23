@@ -95,7 +95,6 @@
                 const res = await fetch('/api/admin/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // FIXED: Now including both username and passphrase
                     body: JSON.stringify({ 
                         username: usernameInput,
                         passphrase: passwordInput 
@@ -108,7 +107,10 @@
                     throw new Error(data.error || 'Authentication rejected.');
                 }
 
-                localStorage.setItem('cx_session', data.token);
+                // IMPORTANT: This key/value pair MUST match the Session Guard in your other pages
+                // All other pages are checking for: localStorage.getItem('cx_session') === 'authenticated_token'
+                localStorage.setItem('cx_session', 'authenticated_token');
+                
                 window.location.replace('dashboard.html');
 
             } catch (err) {

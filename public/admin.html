@@ -151,11 +151,19 @@
 
     <script>
         // ─── SESSION GUARD ────────────────────────────────────────────────────────────
-        (function () {
-            if (localStorage.getItem('cx_session') !== 'authenticated_token') {
-                window.location.replace('login.html');
-            }
-        })();
+    // ─── SESSION GUARD ──────────────────────────────────────────
+    (function () {
+        // Ensure this matches exactly what you set in login.html
+        if (localStorage.getItem('cx_session') !== 'authenticated_token') {
+            window.location.replace('login.html');
+        }
+    })();
+
+    function logout() {
+        localStorage.removeItem('cx_session');
+        window.location.replace('login.html');
+    }
+    
 
         // ─── LOGOUT ───────────────────────────────────────────────────────────────────
         // FIX: old button only redirected — never cleared the token
