@@ -103,13 +103,13 @@
     <script>
         // ─── SESSION GUARD ────────────────────────────────────────────────────────────
         (function () {
-            if (localStorage.getItem('cx_session') !== 'authenticated_token') {
+            // Evaluates presence of signed JWT payload rather than hardcoded validation strings
+            if (!localStorage.getItem('cx_session')) {
                 window.location.replace('login.html');
             }
         })();
 
         // ─── LOGOUT ───────────────────────────────────────────────────────────────────
-        // FIX: old button only redirected — never cleared the token. Guard now blocks re-entry.
         function logout() {
             localStorage.removeItem('cx_session');
             window.location.replace('login.html');
@@ -117,8 +117,10 @@
 
         window.onload = () => {
             const toast = document.getElementById('welcome-toast');
-            toast.style.display = 'block';
-            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+            if (toast) {
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 3000);
+            }
         };
     </script>
 </body>

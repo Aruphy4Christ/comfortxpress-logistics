@@ -123,8 +123,11 @@
             window.location.replace('login.html');
         }
 
+        let inquiryInterval;
+
         // ─── LOGOUT ───────────────────────────────────────────────────────────────────
         function logout() {
+            if (inquiryInterval) clearInterval(inquiryInterval);
             localStorage.removeItem('cx_session');
             window.location.replace('login.html');
         }
@@ -133,7 +136,6 @@
         let socket;
         try {
             socket = io();
-            // Pass the cryptographically signed JWT token to join the secure admin-room
             socket.emit('joinAdminRoom', token);
         } catch (e) {
             console.warn('Socket.io init failed. Falling back to HTTP polling.', e);
@@ -150,12 +152,10 @@
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
-                // Clear outdated authorization failure screens if present
                 const oldNotice = document.getElementById('noMsgNotice');
                 if (oldNotice) oldNotice.remove();
 
                 if (res.status === 401 || res.status === 403) {
-                    alert('Session credentials expired or invalid security clearance.');
                     logout();
                     return;
                 }
@@ -167,7 +167,9 @@
 
                 if (data.length === 0) {
                     tableEl.style.display = 'none';
-                    containerEl.innerHTML += `<div id="noMsgNotice" class="no-orders">No inquiries logged yet.</div>`;
+                    if (!document.getElementById('noMsgNotice')) {
+                        containerEl.innerHTML += `<div id="noMsgNotice" class="no-orders">No inquiries logged yet.</div>`;
+                    }
                     return;
                 }
 
@@ -230,13 +232,11 @@
                 });
                 
                 if (res.status === 401 || res.status === 403) {
-                    alert('Session expired. Please log in again.');
                     logout();
                     return;
                 }
 
                 if (res.ok) loadInquiries();
-                else console.error('markRead system failure status:', res.status);
             } catch (err) {
                 console.error('markRead exception:', err);
             }
@@ -249,8 +249,10 @@
             socket.on('error', (err) => console.warn('Socket exception context:', err));
         }
 
-        setInterval(loadInquiries, 30000);
-        window.onload = loadInquiries;
+        window.onload = () => {
+            loadInquiries();
+            inquiryInterval = setInterval(loadInquiries, 30000);
+        };
     </script>
 </body>
 </html>
