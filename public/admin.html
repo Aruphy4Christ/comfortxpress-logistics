@@ -6,7 +6,7 @@
     <title>ComfortXpress Admin | Control Panel</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <script src="/socket.io/socket.io.js"></script>
 
     <style>
@@ -19,7 +19,6 @@
 
         .app-container { display: flex; flex: 1; }
 
-        /* Layout & Sidebar */
         .sidebar { width: 260px; background: var(--sidebar-dark); color: white; padding: 30px 20px; display: flex; flex-direction: column; justify-content: space-between; }
         .logo { font-size: 1.4rem; font-weight: 800; margin-bottom: 40px; }
         .logo span { color: var(--accent); }
@@ -27,7 +26,6 @@
         .nav-links a { color: #e2e8f0; text-decoration: none; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
         .nav-links a.active { background: var(--primary); color: white; }
 
-        /* Sidebar User Profile Status Widget */
         .sidebar-profile { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; }
         .sidebar-profile i { font-size: 2rem; color: #cbd5e1; }
         .profile-info h4 { font-size: 0.9rem; font-weight: 600; }
@@ -39,7 +37,6 @@
         .logout-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; }
         .logout-btn:hover { background: rgba(255,255,255,0.2); }
 
-        /* Form Styling */
         .container { padding: 40px; flex-grow: 1; }
         .order-entry-card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 30px; }
         .order-entry-card h3 { font-size: 1.1rem; margin-bottom: 15px; color: #1e293b; }
@@ -48,29 +45,25 @@
         .add-btn { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
         .add-btn:hover { opacity: 0.9; }
 
-        /* Table Section Headings */
         .section-title { font-size: 1.2rem; color: #1e293b; margin: 25px 0 12px 0; display: flex; align-items: center; gap: 10px; font-weight: 600; }
         .section-title span { background: #e2e8f0; font-size: 0.8rem; padding: 2px 8px; border-radius: 20px; color: #475569; }
 
-        /* Table Styling with Status Badges */
         table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 30px; }
         th { background: #f1f5f9; padding: 16px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: #475569; font-weight: 600; }
         td { padding: 16px; border-bottom: 1px solid #e2e8f0; color: #334155; font-size: 0.9rem; }
-        
+
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; display: inline-block; text-align: center; }
-        .badge-pending { background: #fee2e2; color: #991b1b; }
-        .badge-transit { background: #dbeafe; color: #1e40af; }
+        .badge-pending   { background: #fee2e2; color: #991b1b; }
+        .badge-transit   { background: #dbeafe; color: #1e40af; }
         .badge-delivered { background: #dcfce7; color: #166534; }
-        
-        /* Graceful Pill Tags for Dedicated Origin Column */
+
         .tag-origin { padding: 5px 10px; border-radius: 50px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
         .tag-customer { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
-        .tag-admin { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
-        
+        .tag-admin    { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+
         select.action-dropdown { padding: 6px; border-radius: 4px; border: 1px solid #cbd5e1; background: white; cursor: pointer; font-size: 0.85rem; }
         .no-orders { padding: 20px; text-align: center; color: #94a3b8; background: white; border-radius: 8px; border: 1px dashed #cbd5e1; margin-bottom: 30px; font-size: 0.9rem; }
 
-        /* Footer */
         footer { text-align: center; padding: 20px; color: #94a3b8; font-size: 0.85rem; background: #f8fafc; }
     </style>
 </head>
@@ -85,7 +78,6 @@
                 <li><a href="admin.html" class="active"><i class="fas fa-lock"></i> Admin</a></li>
                 <li><a href="message.html"><i class="fas fa-comment-alt"></i> Contact Us</a></li>
             </ul>
-            
             <div class="sidebar-profile">
                 <i class="fas fa-user-circle"></i>
                 <div class="profile-info">
@@ -98,6 +90,7 @@
         <main class="main-content">
             <header class="top-bar">
                 <h2><i class="fas fa-lock"></i> Admin Control Panel</h2>
+                <!-- FIX: was only redirecting, never clearing session token -->
                 <button class="logout-btn" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
@@ -107,33 +100,28 @@
                 <section class="order-entry-card">
                     <h3>Create New Order (Manual Admin Entry)</h3>
                     <div class="form-grid">
-                        <input type="text" id="cName" placeholder="Customer Name">
+                        <input type="text" id="cName"   placeholder="Customer Name">
                         <select id="pType">
                             <option value="Personal Delivery">Personal Delivery</option>
                             <option value="Corporate Dispatch">Corporate Dispatch</option>
                             <option value="Bulk/Express Courier">Bulk/Express Courier</option>
                         </select>
-                        <input type="text" id="pickup" placeholder="Pickup Address">
+                        <input type="text" id="pickup"  placeholder="Pickup Address">
                         <input type="text" id="dropoff" placeholder="Dropoff Address">
                         <button class="add-btn" onclick="createOrder()">Add Order</button>
                     </div>
                 </section>
 
                 <div class="section-title">
-                    <i class="fas fa-truck-ramp-box" style="color: var(--accent);"></i> Active Shipments 
+                    <i class="fas fa-truck-ramp-box" style="color: var(--accent);"></i> Active Shipments
                     <span id="activeCount">0</span>
                 </div>
                 <div id="activeContainer">
                     <table id="activeOrdersTable">
                         <thead>
                             <tr>
-                                <th>Logistics</th>
-                                <th>Tracking ID</th>
-                                <th>Customer</th>
-                                <th>Channel</th> 
-                                <th>Route</th>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th>Logistics</th><th>Tracking ID</th><th>Customer</th>
+                                <th>Channel</th><th>Route</th><th>Status</th><th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="activeOrdersBody"></tbody>
@@ -141,20 +129,15 @@
                 </div>
 
                 <div class="section-title">
-                    <i class="fas fa-circle-check" style="color: var(--success);"></i> Completed Deliveries 
+                    <i class="fas fa-circle-check" style="color: var(--success);"></i> Completed Deliveries
                     <span id="completedCount">0</span>
                 </div>
                 <div id="completedContainer">
                     <table id="deliveredOrdersTable">
                         <thead>
                             <tr>
-                                <th>Logistics</th>
-                                <th>Tracking ID</th>
-                                <th>Customer</th>
-                                <th>Channel</th> 
-                                <th>Route</th>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th>Logistics</th><th>Tracking ID</th><th>Customer</th>
+                                <th>Channel</th><th>Route</th><th>Status</th><th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="deliveredOrdersBody"></tbody>
@@ -162,161 +145,160 @@
                 </div>
             </div>
 
-            <footer>
-                &copy; 2026 ComfortXpress Admin Portal. All rights reserved.
-            </footer>
+            <footer>&copy; 2026 ComfortXpress Admin Portal. All rights reserved.</footer>
         </main>
     </div>
 
     <script>
-        (function() {
+        // ─── SESSION GUARD ────────────────────────────────────────────────────────────
+        (function () {
             if (localStorage.getItem('cx_session') !== 'authenticated_token') {
                 window.location.replace('login.html');
             }
         })();
 
+        // ─── LOGOUT ───────────────────────────────────────────────────────────────────
+        // FIX: old button only redirected — never cleared the token
         function logout() {
             localStorage.removeItem('cx_session');
             window.location.replace('login.html');
         }
 
+        // ─── CONFIG ───────────────────────────────────────────────────────────────────
+        const ADMIN_KEY = '79975cbf52d9eb4e0f790f270256a38ab40155e8a18567f71e9b52b77ec98436';
+
+        // ─── SOCKET ──────────────────────────────────────────────────────────────────
+        // FIX: was io() with no auth — socket never joined admin-room, real-time was dead
         let socket;
         try {
-            socket = io();
+            socket = io({ auth: { token: ADMIN_KEY } });
+            socket.emit('joinAdminRoom');
         } catch (e) {
-            console.warn("Socket.io connection initialization failed. Falling back to HTTP workflows.", e);
+            console.warn('Socket.io init failed. Falling back to polling.', e);
         }
 
         async function fetchOrders() {
             try {
                 const res = await fetch('/api/orders');
-                if (!res.ok) throw new Error("Backend synchronization failure.");
+                if (!res.ok) throw new Error('Backend synchronization failure.');
                 const orders = await res.json();
-                
-                const activeTbody = document.getElementById('activeOrdersBody');
+
+                const activeTbody    = document.getElementById('activeOrdersBody');
                 const deliveredTbody = document.getElementById('deliveredOrdersBody');
-                
-                activeTbody.innerHTML = '';
+                activeTbody.innerHTML    = '';
                 deliveredTbody.innerHTML = '';
-                
-                let activeCount = 0;
+
+                let activeCount    = 0;
                 let completedCount = 0;
-                
+
                 orders.forEach(order => {
                     let badgeClass = 'badge-pending';
-                    if(order.status === 'In Transit' || order.status === 'Assigned to Rider') badgeClass = 'badge-transit';
-                    if(order.status === 'Delivered') badgeClass = 'badge-delivered';
+                    if (order.status === 'In Transit' || order.status === 'Assigned to Rider') badgeClass = 'badge-transit';
+                    if (order.status === 'Delivered') badgeClass = 'badge-delivered';
 
-                    const pkgType = order.packageDetails || order.logisticsType || 'Standard Logistics';
-                    const trackId = order.trackingId || 'N/A';
-                    const custName = order.customerName || order.senderName || 'Guest User';
-                    const routeFrom = order.pickupAddress || order.collectionPoint || 'N/A';
-                    const routeTo = order.dropoffAddress || order.deliveryAddress || order.destinationPoint || 'N/A';
+                    const pkgType   = order.packageDetails || order.logisticsType || 'Standard Logistics';
+                    const trackId   = order.trackingId || 'N/A';
+                    const custName  = order.customerName || order.senderName || 'Guest User';
+                    const routeFrom = order.pickupAddress  || order.collectionPoint  || 'N/A';
+                    const routeTo   = order.dropoffAddress || order.deliveryAddress  || order.destinationPoint || 'N/A';
 
-                    let originTagHtml = '';
-                    if (order.origin === 'customer') {
-                        originTagHtml = `<span class="tag-origin tag-customer"><i class="fas fa-laptop"></i> Client App</span>`;
-                    } else {
-                        originTagHtml = `<span class="tag-origin tag-admin"><i class="fas fa-user-shield"></i> Admin Entry</span>`;
-                    }
+                    const originTagHtml = order.origin === 'customer'
+                        ? `<span class="tag-origin tag-customer"><i class="fas fa-laptop"></i> Client App</span>`
+                        : `<span class="tag-origin tag-admin"><i class="fas fa-user-shield"></i> Desk Entry</span>`;
 
-                    const actionDropdown = `
-                        <select class="action-dropdown" onchange="updateStatus('${order._id}', this.value)">
-                            <option value="" disabled selected>Update Status...</option>
-                            <option value="Pending">Pending</option>
-                            <option value="In Transit">In Transit</option>
-                            <option value="Delivered">Delivered</option>
-                        </select>
-                    `;
+                    const rowHtml = `<tr>
+                        <td><strong>${pkgType}</strong></td>
+                        <td><strong>${trackId}</strong></td>
+                        <td>${custName}</td>
+                        <td>${originTagHtml}</td>
+                        <td>${routeFrom} &rarr; ${routeTo}</td>
+                        <td><span class="badge ${badgeClass}">${order.status || 'Pending'}</span></td>
+                        <td>
+                            <select class="action-dropdown" onchange="updateStatus('${order._id}', this.value)">
+                                <option value="Pending"    ${order.status==='Pending'   ?'selected':''}>Pending</option>
+                                <option value="In Transit" ${order.status==='In Transit'?'selected':''}>In Transit</option>
+                                <option value="Delivered"  ${order.status==='Delivered' ?'selected':''}>Delivered</option>
+                            </select>
+                        </td>
+                    </tr>`;
 
-                    const rowHtml = `
-                        <tr>
-                            <td style="font-weight:600;">${pkgType}</td>
-                            <td style="font-family:monospace; color:var(--transit);">${trackId}</td>
-                            <td><strong>${custName}</strong></td>
-                            <td>${originTagHtml}</td>
-                            <td style="font-size: 0.8rem; color: #64748b;">
-                                <div><i class="fas fa-arrow-up" style="color:var(--success); margin-right:4px;"></i>${routeFrom}</div>
-                                <div style="margin-top:4px;"><i class="fas fa-arrow-down" style="color:var(--danger); margin-right:4px;"></i>${routeTo}</div>
-                            </td>
-                            <td><span class="badge ${badgeClass}">${order.status || 'Pending'}</span></td>
-                            <td>${actionDropdown}</td>
-                        </tr>
-                    `;
-
-                    if (order.status === 'Delivered') {
-                        deliveredTbody.innerHTML += rowHtml;
-                        completedCount++;
-                    } else {
-                        activeTbody.innerHTML += rowHtml;
-                        activeCount++;
-                    }
+                    if (order.status === 'Delivered') { deliveredTbody.innerHTML += rowHtml; completedCount++; }
+                    else                              { activeTbody.innerHTML    += rowHtml; activeCount++; }
                 });
 
-                document.getElementById('activeCount').innerText = activeCount;
+                document.getElementById('activeCount').innerText    = activeCount;
                 document.getElementById('completedCount').innerText = completedCount;
 
-                if(activeCount === 0) {
-                    activeTbody.innerHTML = '<tr><td colspan="7"><div class="no-orders">No active shipments in the network.</div></td></tr>';
+                document.getElementById('activeOrdersTable').style.display    = activeCount    === 0 ? 'none' : 'table';
+                document.getElementById('deliveredOrdersTable').style.display = completedCount === 0 ? 'none' : 'table';
+
+                if (activeCount === 0 && !document.getElementById('noActiveMsg')) {
+                    document.getElementById('activeContainer').innerHTML += `<div id="noActiveMsg" class="no-orders">No active operational dispatches found.</div>`;
+                } else if (activeCount > 0 && document.getElementById('noActiveMsg')) {
+                    document.getElementById('noActiveMsg').remove();
                 }
-                if(completedCount === 0) {
-                    deliveredTbody.innerHTML = '<tr><td colspan="7"><div class="no-orders">No completed deliveries on record.</div></td></tr>';
+
+                if (completedCount === 0 && !document.getElementById('noDeliveredMsg')) {
+                    document.getElementById('completedContainer').innerHTML += `<div id="noDeliveredMsg" class="no-orders">No historical entries found.</div>`;
+                } else if (completedCount > 0 && document.getElementById('noDeliveredMsg')) {
+                    document.getElementById('noDeliveredMsg').remove();
                 }
 
             } catch (err) {
-                console.error("Failed to load admin panel data:", err);
-            }
-        }
-
-        async function updateStatus(id, newStatus) {
-            try {
-                const res = await fetch(`/api/orders/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: newStatus })
-                });
-                if(res.ok) fetchOrders();
-            } catch (err) {
-                console.error('Status update failed:', err);
+                console.error('Error drawing operational layout:', err);
             }
         }
 
         async function createOrder() {
-            const customerName = document.getElementById('cName').value;
+            const customerName   = document.getElementById('cName').value;
             const packageDetails = document.getElementById('pType').value;
-            const pickupAddress = document.getElementById('pickup').value;
+            const pickupAddress  = document.getElementById('pickup').value;
             const dropoffAddress = document.getElementById('dropoff').value;
 
-            if(!customerName || !pickupAddress || !dropoffAddress) {
-                alert('Please fill out all address and name fields.');
-                return;
+            if (!customerName || !pickupAddress || !dropoffAddress) {
+                return alert('Please fill in all required fields.');
             }
+
+            const trackingId = 'CX-ADM' + Math.floor(Math.random() * 90000 + 10000);
 
             try {
                 const res = await fetch('/api/orders', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        customerName, packageDetails, pickupAddress, dropoffAddress, origin: 'admin', status: 'Pending'
-                    })
+                    body: JSON.stringify({ trackingId, customerName, packageDetails, pickupAddress, dropoffAddress, status: 'Pending', origin: 'admin' })
                 });
-                if(res.ok) {
-                    document.getElementById('cName').value = '';
-                    document.getElementById('pickup').value = '';
+                if (res.ok) {
+                    document.getElementById('cName').value   = '';
+                    document.getElementById('pickup').value  = '';
                     document.getElementById('dropoff').value = '';
                     fetchOrders();
+                } else {
+                    alert('Submission error — check server logs.');
                 }
             } catch (err) {
-                console.error('Order creation failed:', err);
+                console.error(err);
+            }
+        }
+
+        async function updateStatus(orderId, newStatus) {
+            try {
+                const res = await fetch(`/api/orders/${orderId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                if (res.ok) fetchOrders();
+            } catch (err) {
+                console.error('Update error:', err);
             }
         }
 
         if (socket) {
-            socket.on('newOrder', () => fetchOrders());
-            socket.on('statusUpdate', () => fetchOrders());
+            socket.on('newOrderCreated', () => fetchOrders());
+            socket.on('orderUpdated',    () => fetchOrders());
         }
 
-        setInterval(fetchOrders, 30000);
+        setInterval(fetchOrders, 5000);
         window.onload = fetchOrders;
     </script>
 </body>

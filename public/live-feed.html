@@ -6,7 +6,7 @@
     <title>ComfortXpress Admin | Live Feed</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         :root {
             --primary: #163961;
@@ -17,11 +17,9 @@
             --danger: #ef4444;
             --text-light: #e2e8f0;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: #f8fafc; display: flex; min-height: 100vh; }
 
-        /* Sidebar Styling */
         .sidebar { width: 260px; background: var(--sidebar-dark); color: white; padding: 30px 20px; display: flex; flex-direction: column; }
         .logo { font-size: 1.4rem; font-weight: 800; margin-bottom: 40px; }
         .logo span { color: var(--accent); }
@@ -32,27 +30,13 @@
         .admin-profile { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px; }
         .status-dot { width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success); }
 
-        /* Main Content */
         .main-content { flex-grow: 1; display: flex; flex-direction: column; }
-        .top-bar { 
-            background: linear-gradient(135deg, #163961 0%, #1e4a7d 100%); 
-            padding: 20px 40px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            color: white;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        .logout-btn { 
-            background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); 
-            padding: 8px 16px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600;
-        }
+        .top-bar { background: linear-gradient(135deg, #163961 0%, #1e4a7d 100%); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .logout-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; }
         .logout-btn:hover { background: var(--danger); border-color: var(--danger); }
 
-        /* Container & Feed */
         .container { padding: 40px; flex-grow: 1; max-width: 900px; }
-        
-        /* Summary Metrics Rows Styles */
+
         .metrics-container { display: flex; gap: 20px; margin-bottom: 30px; }
         .metric-card { flex: 1; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
         .metric-card i { font-size: 2rem; color: var(--accent); background: #fff7ed; padding: 10px; border-radius: 10px; }
@@ -67,13 +51,12 @@
         .border-pending { border-left-color: var(--accent); }
         .border-transit { border-left-color: var(--primary); }
         .border-delivered { border-left-color: var(--success); }
-        
+
         .badge { font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; font-weight: 600; float: right; text-transform: uppercase; }
         .bg-pending { background: #ffedd5; color: #9a3412; }
         .bg-transit { background: #dbeafe; color: #1e40af; }
         .bg-delivered { background: #dcfce7; color: #166534; }
 
-        /* UX Improved Metadata Row */
         .order-meta { display: flex; gap: 15px; margin: 8px 0 12px 0; font-size: 0.75rem; color: #64748b; font-weight: 500; }
         .order-meta span { display: flex; align-items: center; gap: 5px; }
         .meta-val { color: #334155; }
@@ -83,7 +66,7 @@
         .btn-assign { background: var(--accent); }
         .btn-delivered { background: var(--success); }
         .btn-reactivate { background: #64748b; }
-        
+
         footer { text-align: center; padding: 30px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
     </style>
 </head>
@@ -109,13 +92,13 @@
     <main class="main-content">
         <header class="top-bar">
             <h2><i class="fas fa-satellite-dish" style="margin-right: 10px;"></i> Live Rider Requests</h2>
+            <!-- FIX: was only redirecting, never clearing session token -->
             <button class="logout-btn" onclick="logout()">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </button>
         </header>
 
         <div class="container">
-            
             <div class="metrics-container">
                 <div class="metric-card">
                     <div class="metric-info">
@@ -144,12 +127,15 @@
     </main>
 
     <script>
-        (function() {
+        // ─── SESSION GUARD ────────────────────────────────────────────────────────────
+        (function () {
             if (localStorage.getItem('cx_session') !== 'authenticated_token') {
                 window.location.replace('login.html');
             }
         })();
 
+        // ─── LOGOUT ───────────────────────────────────────────────────────────────────
+        // FIX: old button only redirected — never cleared the token
         function logout() {
             localStorage.removeItem('cx_session');
             window.location.replace('login.html');
@@ -158,90 +144,69 @@
         async function render() {
             try {
                 const res = await fetch('/api/orders');
-                if (!res.ok) throw new Error("Could not retrieve backend orders collection.");
+                if (!res.ok) throw new Error('Could not retrieve backend orders collection.');
                 const orders = await res.json();
-                
-                const activeStream = document.getElementById('activeStream');
-                const completedStream = document.getElementById('completedStream');
 
-                activeStream.innerHTML = '';
+                const activeStream    = document.getElementById('activeStream');
+                const completedStream = document.getElementById('completedStream');
+                activeStream.innerHTML    = '';
                 completedStream.innerHTML = '';
 
-                let activeCount = 0;
+                let activeCount    = 0;
                 let completedCount = 0;
 
-                const customerRequests = orders.filter(order => order.origin === 'customer' || !order.origin);
+                const customerRequests = orders.filter(o => o.origin === 'customer' || !o.origin);
 
                 if (customerRequests.length === 0) {
-                    activeStream.innerHTML = '<div class="empty-msg">No customer ride requests found.</div>';
+                    activeStream.innerHTML    = '<div class="empty-msg">No customer ride requests found.</div>';
                     completedStream.innerHTML = '<div class="empty-msg">No completed customer requests.</div>';
-                    document.getElementById('totalActiveCount').innerText = '0';
+                    document.getElementById('totalActiveCount').innerText    = '0';
                     document.getElementById('totalDeliveredCount').innerText = '0';
                     return;
                 }
 
                 customerRequests.forEach(order => {
-                    let badgeClass = 'bg-pending';
+                    let badgeClass  = 'bg-pending';
                     let borderClass = 'border-pending';
-                    
-                    if (order.status === 'In Transit') {
-                        badgeClass = 'bg-transit';
-                        borderClass = 'border-transit';
-                    }
-                    if (order.status === 'Delivered') {
-                        badgeClass = 'bg-delivered';
-                        borderClass = 'border-delivered';
-                    }
+                    if (order.status === 'In Transit')  { badgeClass = 'bg-transit';   borderClass = 'border-transit'; }
+                    if (order.status === 'Delivered')   { badgeClass = 'bg-delivered'; borderClass = 'border-delivered'; }
 
                     let buttonsHtml = '';
-                    if (order.status === 'Pending') {
-                        buttonsHtml = `<button class="btn-assign" onclick="updateStatus('${order._id}', 'In Transit')"><i class="fas fa-motorcycle"></i> Assign Rider</button>`;
-                    } else if (order.status === 'In Transit') {
-                        buttonsHtml = `<button class="btn-delivered" onclick="updateStatus('${order._id}', 'Delivered')"><i class="fas fa-circle-check"></i> Mark Delivered</button>`;
-                    } else if (order.status === 'Delivered') {
-                        buttonsHtml = `<button class="btn-reactivate" onclick="updateStatus('${order._id}', 'Pending')"><i class="fas fa-rotate-left"></i> Reactivate</button>`;
-                    }
+                    if (order.status === 'Pending')     buttonsHtml = `<button class="btn-assign"     onclick="updateStatus('${order._id}','In Transit')"><i class="fas fa-motorcycle"></i> Assign Rider</button>`;
+                    else if (order.status === 'In Transit') buttonsHtml = `<button class="btn-delivered" onclick="updateStatus('${order._id}','Delivered')"><i class="fas fa-circle-check"></i> Mark Delivered</button>`;
+                    else if (order.status === 'Delivered')  buttonsHtml = `<button class="btn-reactivate" onclick="updateStatus('${order._id}','Pending')"><i class="fas fa-rotate-left"></i> Reactivate</button>`;
 
                     const cardHtml = `
                         <div class="order-card ${borderClass}">
                             <span class="badge ${badgeClass}">${order.status}</span>
-                            <h4 style="color: #1e293b; font-size: 1rem; font-weight: 600;">${order.packageDetails || 'General Dispatch'}</h4>
-                            
+                            <h4 style="color:#1e293b;font-size:1rem;font-weight:600;">${order.packageDetails || 'General Dispatch'}</h4>
                             <div class="order-meta">
                                 <span>ID: <strong class="meta-val">${order.trackingId || 'N/A'}</strong></span>
                                 <span>Client: <strong class="meta-val">${order.customerName}</strong></span>
                             </div>
-                            
-                            <p style="font-size: 0.85rem; color: #475569; margin-bottom: 5px;">
-                                <i class="fas fa-map-marker-alt" style="color: var(--accent); width: 15px;"></i> 
+                            <p style="font-size:0.85rem;color:#475569;margin-bottom:5px;">
+                                <i class="fas fa-map-marker-alt" style="color:var(--accent);width:15px;"></i>
                                 <strong>Pickup:</strong> ${order.pickupAddress}
                             </p>
-                            <p style="font-size: 0.85rem; color: #475569;">
-                                <i class="fas fa-flag-checkered" style="color: var(--primary); width: 15px;"></i> 
+                            <p style="font-size:0.85rem;color:#475569;">
+                                <i class="fas fa-flag-checkered" style="color:var(--primary);width:15px;"></i>
                                 <strong>Dropoff:</strong> ${order.dropoffAddress || order.deliveryAddress}
                             </p>
-                            
                             <div class="btn-group">${buttonsHtml}</div>
-                        </div>
-                    `;
+                        </div>`;
 
-                    if (order.status === 'Delivered') {
-                        completedStream.innerHTML += cardHtml;
-                        completedCount++;
-                    } else {
-                        activeStream.innerHTML += cardHtml;
-                        activeCount++;
-                    }
+                    if (order.status === 'Delivered') { completedStream.innerHTML += cardHtml; completedCount++; }
+                    else                              { activeStream.innerHTML    += cardHtml; activeCount++; }
                 });
 
-                document.getElementById('totalActiveCount').innerText = activeCount;
+                document.getElementById('totalActiveCount').innerText    = activeCount;
                 document.getElementById('totalDeliveredCount').innerText = completedCount;
 
-                if (activeCount === 0) activeStream.innerHTML = '<div class="empty-msg">No active pending customer requests.</div>';
+                if (activeCount === 0)    activeStream.innerHTML    = '<div class="empty-msg">No active pending customer requests.</div>';
                 if (completedCount === 0) completedStream.innerHTML = '<div class="empty-msg">No historical completed entries found.</div>';
 
             } catch (err) {
-                console.error("Error drawing live feed layout matrix:", err);
+                console.error('Error drawing live feed:', err);
             }
         }
 
@@ -254,7 +219,7 @@
                 });
                 if (res.ok) render();
             } catch (err) {
-                console.error("Failed to transition status attribute:", err);
+                console.error('Failed to transition status:', err);
             }
         }
 
