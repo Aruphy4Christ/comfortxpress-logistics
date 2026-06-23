@@ -17,49 +17,31 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             background: linear-gradient(135deg, var(--dark-slate) 0%, #11253e 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
         }
 
         .auth-card {
-            background: var(--white);
-            width: 100%;
-            max-width: 420px;
-            padding: 45px 40px;
-            border-radius: 24px;
+            background: var(--white); width: 100%; max-width: 420px;
+            padding: 45px 40px; border-radius: 24px;
             box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
-            box-sizing: border-box;
             text-align: center;
-            animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        .brand-title { font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; color: var(--primary-blue); margin-bottom: 8px; }
+        .brand-title { font-size: 2rem; font-weight: 800; color: var(--primary-blue); margin-bottom: 8px; }
         .brand-title span { color: var(--accent-orange); }
-        .subtitle { color: var(--text-muted); font-size: 1rem; font-weight: 600; margin-bottom: 35px; text-transform: uppercase; letter-spacing: 1px; }
+        .subtitle { color: var(--text-muted); font-size: 1rem; font-weight: 600; margin-bottom: 35px; text-transform: uppercase; }
 
         #loginErrorMessage {
             background-color: #fee2e2; color: #dc2626; border: 2px solid #fecaca;
-            padding: 12px 16px; border-radius: 12px; font-size: 0.9rem; font-weight: 600; 
+            padding: 12px 16px; border-radius: 12px; font-size: 0.9rem;
             margin-bottom: 24px; display: none; text-align: left;
         }
 
         .form-group { margin-bottom: 24px; text-align: left; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #334155; font-size: 0.9rem; }
-        .form-control { width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; font-size: 1rem; color: var(--dark-slate); transition: all 0.3s ease; }
-        .form-control:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 4px rgba(22, 57, 97, 0.1); outline: none; }
-
-        .btn-submit { background: linear-gradient(135deg, var(--accent-orange) 0%, #e06f12 100%); color: var(--white); border: none; width: 100%; padding: 16px; cursor: pointer; border-radius: 12px; font-weight: 700; font-size: 1rem; box-shadow: 0 10px 20px rgba(245, 130, 31, 0.25); transition: all 0.3s ease; }
-        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 15px 25px rgba(245, 130, 31, 0.35); }
-
-        @keyframes cardEntrance {
-            from { opacity: 0; transform: translateY(30px) scale(0.96); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
+        .form-control { width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; }
+        .btn-submit { background: var(--accent-orange); color: white; border: none; width: 100%; padding: 16px; cursor: pointer; border-radius: 12px; font-weight: 700; }
     </style>
 </head>
 <body>
@@ -67,60 +49,53 @@
     <div class="auth-card">
         <div class="brand-title">Comfort<span>Xpress</span></div>
         <div class="subtitle">Enterprise Control Panel</div>
-        
         <div id="loginErrorMessage"></div>
         
         <form id="loginForm">
             <div class="form-group">
-                <label for="username">Operator Security ID</label>
-                <input type="text" id="username" class="form-control" placeholder="Enter Admin Username" required autocomplete="username">
+                <label>Operator Security ID</label>
+                <input type="text" id="username" class="form-control" required>
             </div>
             <div class="form-group">
-                <label for="securePassphraseField">Secure Passphrase</label>
-                <input type="password" id="securePassphraseField" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+                <label>Secure Passphrase</label>
+                <input type="password" id="securePassphraseField" class="form-control" required>
             </div>
             <button type="submit" class="btn-submit">Authorize Session</button>
         </form>
     </div>
 
     <script>
-        async function handleLogin(event) {
-            event.preventDefault();
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
             
-            const usernameInput = document.getElementById('username').value;
-            const passwordInput = document.getElementById('securePassphraseField').value;
+            // Clear old sessions before trying to login
+            localStorage.clear();
+            
             const errorMessageEl = document.getElementById('loginErrorMessage');
+            const username = document.getElementById('username').value;
+            const passphrase = document.getElementById('securePassphraseField').value;
             
             try {
                 const res = await fetch('/api/admin/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        username: usernameInput,
-                        passphrase: passwordInput 
-                    })
+                    body: JSON.stringify({ username, passphrase })
                 });
 
                 const data = await res.json();
 
-                if (!res.ok) {
-                    throw new Error(data.error || 'Authentication rejected.');
+                if (res.ok) {
+                    // Set the EXACT token your other pages are checking for
+                    localStorage.setItem('cx_session', 'authenticated_token');
+                    window.location.replace('dashboard.html');
+                } else {
+                    throw new Error(data.message || 'Invalid security clearance.');
                 }
-
-                // IMPORTANT: This key/value pair MUST match the Session Guard in your other pages
-                // All other pages are checking for: localStorage.getItem('cx_session') === 'authenticated_token'
-                localStorage.setItem('cx_session', 'authenticated_token');
-                
-                window.location.replace('dashboard.html');
-
             } catch (err) {
-                console.error('Login process error:', err);
                 errorMessageEl.innerText = err.message;
                 errorMessageEl.style.display = 'block';
             }
-        }
-
-        document.getElementById('loginForm').addEventListener('submit', handleLogin);
+        });
     </script>
 </body>
 </html>

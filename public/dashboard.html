@@ -9,41 +9,24 @@
 
     <style>
         :root {
-            --primary: #163961;
-            --accent: #F5821F;
-            --bg-body: #f8fafc;
-            --sidebar-dark: #0b1d32;
-            --text-light: #e2e8f0;
-            --white: #ffffff;
-            --success: #22c55e;
+            --primary: #163961; --accent: #F5821F; --bg-body: #f8fafc;
+            --sidebar-dark: #0b1d32; --text-light: #e2e8f0; --white: #ffffff; --success: #22c55e;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: var(--bg-body); display: flex; min-height: 100vh; }
-
         .sidebar { width: 260px; background: var(--sidebar-dark); color: white; padding: 30px 20px; display: flex; flex-direction: column; }
         .logo { font-size: 1.4rem; font-weight: 800; margin-bottom: 40px; color: white; }
         .logo span { color: var(--accent); }
         .nav-links { list-style: none; flex-grow: 1; }
-        .nav-links li { margin-bottom: 15px; }
         .nav-links a { color: var(--text-light); text-decoration: none; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; transition: 0.3s; }
-        .nav-links a:hover, .nav-links a.active { background: var(--primary); color: white; }
-
-        .admin-profile { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px; }
-        .status-dot { width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success); }
-
+        .nav-links a.active { background: var(--primary); color: white; }
         .main-content { flex-grow: 1; display: flex; flex-direction: column; }
         .top-bar { background: var(--white); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .container { padding: 40px; flex-grow: 1; }
-
+        .container { padding: 40px; }
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 40px; }
-        .stat-card { background: var(--white); padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; border-top: 4px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
-        .stat-card h3 { font-size: 0.8rem; color: #64748b; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-card { background: var(--white); padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; border-top: 4px solid var(--primary); }
         .stat-card p { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
-        .stat-card i { font-size: 1.5rem; color: var(--accent); opacity: 0.5; }
-
-        footer { padding: 20px 40px; text-align: center; color: #94a3b8; font-size: 0.85rem; border-top: 1px solid #e2e8f0; }
-
-        #welcome-toast { position: fixed; top: 20px; right: 20px; background: var(--success); color: white; padding: 15px 25px; border-radius: 8px; z-index: 1000; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        #welcome-toast { position: fixed; top: 20px; right: 20px; background: var(--success); color: white; padding: 15px 25px; border-radius: 8px; display: none; z-index: 1000; }
     </style>
 </head>
 <body>
@@ -58,13 +41,6 @@
             <li><a href="admin.html"><i class="fas fa-lock"></i> Admin</a></li>
             <li><a href="message.html"><i class="fas fa-comment-alt"></i> Contact Us</a></li>
         </ul>
-        <div class="admin-profile">
-            <i class="fas fa-user-circle fa-2x"></i>
-            <div>
-                <div style="font-size: 0.9rem; font-weight: 600;">System Admin</div>
-                <div style="font-size: 0.7rem; display: flex; align-items: center; gap: 5px;"><span class="status-dot"></span> Admin is in</div>
-            </div>
-        </div>
     </nav>
 
     <main class="main-content">
@@ -77,39 +53,39 @@
 
         <div class="container">
             <div class="stats-grid">
-                <div class="stat-card">
-                    <div><h3>System Load</h3><p id="load-val">24%</p></div>
-                    <i class="fas fa-server"></i>
-                </div>
-                <div class="stat-card">
-                    <div><h3>Active Riders</h3><p id="riders-val">12</p></div>
-                    <i class="fas fa-motorcycle"></i>
-                </div>
-                <div class="stat-card">
-                    <div><h3>Efficiency</h3><p id="eff-val">98%</p></div>
-                    <i class="fas fa-check-double"></i>
-                </div>
-            </div>
-
-            <div style="background: white; padding: 40px; border-radius: 16px; border: 1px solid #e2e8f0; border-left: 4px solid var(--accent);">
-                <h3>Real-time Operational Status</h3>
-                <p style="color: #64748b; margin-top: 10px;">The network is currently operating at optimal efficiency. All relay nodes are reporting stable latency.</p>
+                <div class="stat-card"><h3>System Load</h3><p id="load-val">--%</p></div>
+                <div class="stat-card"><h3>Active Riders</h3><p id="riders-val">--</p></div>
+                <div class="stat-card"><h3>Efficiency</h3><p id="eff-val">--%</p></div>
             </div>
         </div>
-
-        <footer>&copy; 2026 ComfortXpress Logistics. Secure Internal Portal.</footer>
     </main>
 
     <script>
-        // ─── SESSION GUARD ────────────────────────────────────────────────────────────
+        // 1. GLOBAL AUTH CONFIG
+        const ADMIN_KEY = '79975cbf52d9eb4e0f790f270256a38ab40155e8a18567f71e9b52b77ec98436';
+
+        // 2. SESSION GUARD
         (function () {
-            // Evaluates presence of signed JWT payload rather than hardcoded validation strings
-            if (!localStorage.getItem('cx_session')) {
+            if (localStorage.getItem('cx_session') !== 'authenticated_token') {
                 window.location.replace('login.html');
             }
         })();
 
-        // ─── LOGOUT ───────────────────────────────────────────────────────────────────
+        // 3. FETCH DASHBOARD METRICS
+        async function updateDashboard() {
+            try {
+                const res = await fetch('/api/stats', { 
+                    headers: { 'x-admin-key': ADMIN_KEY } 
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('load-val').innerText = data.load + '%';
+                    document.getElementById('riders-val').innerText = data.riders;
+                    document.getElementById('eff-val').innerText = data.efficiency + '%';
+                }
+            } catch (err) { console.error('Metrics fetch failed'); }
+        }
+
         function logout() {
             localStorage.removeItem('cx_session');
             window.location.replace('login.html');
@@ -117,10 +93,9 @@
 
         window.onload = () => {
             const toast = document.getElementById('welcome-toast');
-            if (toast) {
-                toast.style.display = 'block';
-                setTimeout(() => { toast.style.display = 'none'; }, 3000);
-            }
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+            updateDashboard();
         };
     </script>
 </body>

@@ -6,13 +6,12 @@
     <title>ComfortXpress Admin | Support Inquiries Desk</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="/socket.io/socket.io.js"></script>
+    
     <style>
-        :root { --primary: #163961; --accent: #F5821F; --sidebar-dark: #0b1d32; --white: #ffffff; --success: #22c55e; --danger: #ef4444; }
+        :root { --primary: #163961; --accent: #F5821F; --sidebar-dark: #0b1d32; --white: #ffffff; --success: #22c55e; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: #f8fafc; display: flex; min-height: 100vh; }
-        .app-container { display: flex; flex: 1; }
-        .sidebar { width: 260px; background: var(--sidebar-dark); color: white; padding: 30px 20px; display: flex; flex-direction: column; justify-content: space-between; }
+        .sidebar { width: 260px; background: var(--sidebar-dark); color: white; padding: 30px 20px; display: flex; flex-direction: column; }
         .logo { font-size: 1.4rem; font-weight: 800; margin-bottom: 40px; }
         .logo span { color: var(--accent); }
         .nav-links { list-style: none; flex-grow: 1; }
@@ -21,8 +20,8 @@
         .main-content { flex-grow: 1; display: flex; flex-direction: column; }
         .top-bar { background: var(--primary); padding: 20px 40px; color: white; display: flex; justify-content: space-between; align-items: center; }
         .logout-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 6px; cursor: pointer; }
-        .container { padding: 40px; flex-grow: 1; }
-        .table-wrap-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 10px; }
+        .container { padding: 40px; }
+        .table-wrap-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; }
         th { background: #f1f5f9; padding: 16px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: #475569; }
         td { padding: 16px; border-bottom: 1px solid #e2e8f0; color: #334155; font-size: 0.9rem; }
@@ -30,57 +29,65 @@
 </head>
 <body>
 
-    <div class="app-container">
-        <nav class="sidebar">
-            <div class="logo">Comfort<span>Xpress</span></div>
-            <ul class="nav-links">
-                <li><a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
-                <li><a href="live-feed.html"><i class="fas fa-satellite-dish"></i> Rider Requests</a></li>
-                <li><a href="admin.html"><i class="fas fa-lock"></i> Admin</a></li>
-                <li><a href="message.html" class="active"><i class="fas fa-comment-alt"></i> Contact Us</a></li>
-            </ul>
-        </nav>
+    <nav class="sidebar">
+        <div class="logo">Comfort<span>Xpress</span></div>
+        <ul class="nav-links">
+            <li><a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="live-feed.html"><i class="fas fa-satellite-dish"></i> Rider Requests</a></li>
+            <li><a href="admin.html"><i class="fas fa-lock"></i> Admin</a></li>
+            <li><a href="message.html" class="active"><i class="fas fa-comment-alt"></i> Contact Us</a></li>
+        </ul>
+    </nav>
 
-        <main class="main-content">
-            <header class="top-bar">
-                <h2><i class="fas fa-comment-alt"></i> Support Inquiries Desk</h2>
-                <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
-            </header>
+    <main class="main-content">
+        <header class="top-bar">
+            <h2><i class="fas fa-comment-alt" style="margin-right: 10px;"></i> Support Inquiries Desk</h2>
+            <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </header>
 
-            <div class="container">
-                <div class="table-wrap-card">
-                    <table>
-                        <thead>
-                            <tr><th>From</th><th>Email</th><th>Message</th><th>Date</th></tr>
-                        </thead>
-                        <tbody id="messageBody"></tbody>
-                    </table>
-                </div>
+        <div class="container">
+            <div class="table-wrap-card">
+                <table>
+                    <thead>
+                        <tr><th>From</th><th>Email</th><th>Message</th><th>Date</th></tr>
+                    </thead>
+                    <tbody id="messageBody">
+                        </tbody>
+                </table>
             </div>
-        </main>
-    </div>
+        </div>
+    </main>
 
     <script>
-        // SESSION GUARD: Protects this page
+        // 1. CONFIG
+        const ADMIN_KEY = '79975cbf52d9eb4e0f790f270256a38ab40155e8a18567f71e9b52b77ec98436';
+
+        // 2. SESSION GUARD
         (function () {
             if (localStorage.getItem('cx_session') !== 'authenticated_token') {
                 window.location.replace('login.html');
             }
         })();
 
+        // 3. LOGOUT
         function logout() {
             localStorage.removeItem('cx_session');
             window.location.replace('login.html');
         }
 
-        const ADMIN_KEY = '79975cbf52d9eb4e0f790f270256a38ab40155e8a18567f71e9b52b77ec98436';
-
+        // 4. FETCH AND RENDER
         async function fetchMessages() {
             try {
-                const res = await fetch('/api/messages', { headers: { 'x-admin-key': ADMIN_KEY } });
+                const res = await fetch('/api/messages', { 
+                    headers: { 'x-admin-key': ADMIN_KEY } 
+                });
+                
+                if (!res.ok) throw new Error('Authorization failed');
+                
                 const msgs = await res.json();
                 const body = document.getElementById('messageBody');
                 body.innerHTML = '';
+                
                 msgs.forEach(m => {
                     body.innerHTML += `<tr>
                         <td><strong>${m.name}</strong></td>
@@ -89,7 +96,9 @@
                         <td>${new Date(m.createdAt).toLocaleDateString()}</td>
                     </tr>`;
                 });
-            } catch (err) { console.error('Failed to load messages:', err); }
+            } catch (err) { 
+                console.error('Failed to load messages:', err); 
+            }
         }
 
         window.onload = fetchMessages;

@@ -14,53 +14,28 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: #f8fafc; display: flex; min-height: 100vh; }
-
         .sidebar { width: 260px; background: var(--sidebar-dark); color: white; padding: 30px 20px; display: flex; flex-direction: column; }
         .logo { font-size: 1.4rem; font-weight: 800; margin-bottom: 40px; }
         .logo span { color: var(--accent); }
         .nav-links { list-style: none; flex-grow: 1; }
-        .nav-links a { color: var(--text-light); text-decoration: none; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; margin-bottom: 10px; transition: 0.3s; }
-        .nav-links a:hover, .nav-links a.active { background: var(--primary); color: white; }
-
-        .admin-profile { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px; }
-        .status-dot { width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success); }
-
+        .nav-links a { color: var(--text-light); text-decoration: none; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
+        .nav-links a.active { background: var(--primary); color: white; }
         .main-content { flex-grow: 1; display: flex; flex-direction: column; }
-        .top-bar { background: linear-gradient(135deg, #163961 0%, #1e4a7d 100%); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .logout-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; }
-        .logout-btn:hover { background: var(--danger); border-color: var(--danger); }
-
+        .top-bar { background: var(--primary); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .logout-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 6px; cursor: pointer; }
         .container { padding: 40px; flex-grow: 1; max-width: 900px; }
         .metrics-container { display: flex; gap: 20px; margin-bottom: 30px; }
-        .metric-card { flex: 1; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
-        .metric-card i { font-size: 2rem; color: var(--accent); background: #fff7ed; padding: 10px; border-radius: 10px; }
-        .metric-card.completed-card i { color: var(--success); background: #f0fdf4; }
-        .metric-info h3 { font-size: 1.8rem; font-weight: 800; color: #1e293b; line-height: 1.2; }
-        .metric-info p { font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 2px; }
-
-        .section-header { font-size: 1.1rem; font-weight: 800; margin: 25px 0 15px 0; color: #1e293b; }
-        .empty-msg { color: #94a3b8; font-style: italic; padding: 20px; background: white; border-radius: 8px; text-align: center; }
-
+        .metric-card { flex: 1; background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
         .order-card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; border-left: 6px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .border-pending { border-left-color: var(--accent); }
         .border-transit { border-left-color: var(--primary); }
         .border-delivered { border-left-color: var(--success); }
-
         .badge { font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; font-weight: 600; float: right; text-transform: uppercase; }
         .bg-pending { background: #ffedd5; color: #943412; }
         .bg-transit { background: #dbeafe; color: #1e40af; }
         .bg-delivered { background: #dcfce7; color: #166534; }
-
-        .order-meta { display: flex; gap: 15px; margin: 8px 0 12px 0; font-size: 0.75rem; color: #64748b; font-weight: 500; }
-        .order-meta span { display: flex; align-items: center; gap: 5px; }
-        .meta-val { color: #334155; }
-
         .btn-group { margin-top: 15px; display: flex; gap: 10px; }
-        button { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8rem; transition: 0.2s; color: white; }
-        .btn-assign { background: var(--accent); }
-        .btn-delivered { background: var(--success); }
-        .btn-reactivate { background: #64748b; }
-        footer { text-align: center; padding: 30px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+        button { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; color: white; }
     </style>
 </head>
 <body>
@@ -73,108 +48,66 @@
             <li><a href="admin.html"><i class="fas fa-lock"></i> Admin</a></li>
             <li><a href="message.html"><i class="fas fa-comment-alt"></i> Contact Us</a></li>
         </ul>
-        <div class="admin-profile">
-            <i class="fas fa-user-circle fa-2x"></i>
-            <div>
-                <div style="font-size: 0.9rem; font-weight: 600;">System Admin</div>
-                <div style="font-size: 0.7rem; display: flex; align-items: center; gap: 5px;"><span class="status-dot"></span> Admin is in</div>
-            </div>
-        </div>
     </nav>
 
     <main class="main-content">
         <header class="top-bar">
-            <h2><i class="fas fa-satellite-dish" style="margin-right: 10px;"></i> Live Rider Requests</h2>
-            <button class="logout-btn" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </button>
+            <h2><i class="fas fa-satellite-dish"></i> Live Rider Requests</h2>
+            <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </header>
 
         <div class="container">
             <div class="metrics-container">
-                <div class="metric-card">
-                    <div class="metric-info">
-                        <h3 id="totalActiveCount">0</h3>
-                        <p>Active & Pending</p>
-                    </div>
-                    <i class="fas fa-clock-rotate-left"></i>
-                </div>
-                <div class="metric-card completed-card">
-                    <div class="metric-info">
-                        <h3 id="totalDeliveredCount">0</h3>
-                        <p>Total Delivered</p>
-                    </div>
-                    <i class="fas fa-box-open"></i>
-                </div>
+                <div class="metric-card"><div><h3 id="totalActiveCount">0</h3><p>Active & Pending</p></div><i class="fas fa-clock"></i></div>
+                <div class="metric-card"><div><h3 id="totalDeliveredCount">0</h3><p>Total Delivered</p></div><i class="fas fa-box-open"></i></div>
             </div>
-
-            <h2 class="section-header" style="margin-top: 0;">Pending & Active (Customers Only)</h2>
             <div id="activeStream"></div>
-
-            <h2 class="section-header">Completed Deliveries (Customers Only)</h2>
             <div id="completedStream"></div>
         </div>
-
-        <footer>&copy; 2026 ComfortXpress Admin Portal. All rights reserved.</footer>
     </main>
 
     <script>
-        // 1. CONFIGURATION
+        // Define key immediately so it is available to all functions
         const ADMIN_KEY = '79975cbf52d9eb4e0f790f270256a38ab40155e8a18567f71e9b52b77ec98436';
 
-        // 2. SESSION GUARD
         (function () {
             if (localStorage.getItem('cx_session') !== 'authenticated_token') {
                 window.location.replace('login.html');
             }
         })();
 
-        // 3. LOGOUT FUNCTION
         function logout() {
             localStorage.removeItem('cx_session');
             window.location.replace('login.html');
         }
 
-        // 4. DATA RENDERER
         async function render() {
             try {
                 const res = await fetch('/api/orders', { headers: { 'x-admin-key': ADMIN_KEY } });
-                if (!res.ok) throw new Error('Auth failure or connection error.');
+                if (!res.ok) throw new Error('API Error');
                 const orders = await res.json();
 
-                const activeStream    = document.getElementById('activeStream');
+                const activeStream = document.getElementById('activeStream');
                 const completedStream = document.getElementById('completedStream');
-                activeStream.innerHTML    = '';
+                activeStream.innerHTML = '';
                 completedStream.innerHTML = '';
 
                 let activeCount = 0, completedCount = 0;
-                const customerRequests = orders.filter(o => o.origin === 'customer' || !o.origin);
 
-                if (customerRequests.length === 0) {
-                    activeStream.innerHTML = '<div class="empty-msg">No customer ride requests found.</div>';
-                    completedStream.innerHTML = '<div class="empty-msg">No completed customer requests.</div>';
-                    return;
-                }
-
-                customerRequests.forEach(order => {
+                orders.filter(o => o.origin === 'customer').forEach(order => {
                     let badgeClass = 'bg-pending', borderClass = 'border-pending';
-                    if (order.status === 'In Transit')  { badgeClass = 'bg-transit';   borderClass = 'border-transit'; }
-                    if (order.status === 'Delivered')   { badgeClass = 'bg-delivered'; borderClass = 'border-delivered'; }
-
-                    let buttonsHtml = '';
-                    if (order.status === 'Pending')     buttonsHtml = `<button class="btn-assign" onclick="updateStatus('${order._id}','In Transit')"><i class="fas fa-motorcycle"></i> Assign Rider</button>`;
-                    else if (order.status === 'In Transit') buttonsHtml = `<button class="btn-delivered" onclick="updateStatus('${order._id}','Delivered')"><i class="fas fa-circle-check"></i> Mark Delivered</button>`;
-                    else if (order.status === 'Delivered')  buttonsHtml = `<button class="btn-reactivate" onclick="updateStatus('${order._id}','Pending')"><i class="fas fa-rotate-left"></i> Reactivate</button>`;
+                    if (order.status === 'In Transit') { badgeClass = 'bg-transit'; borderClass = 'border-transit'; }
+                    if (order.status === 'Delivered') { badgeClass = 'bg-delivered'; borderClass = 'border-delivered'; }
 
                     const cardHtml = `
                         <div class="order-card ${borderClass}">
                             <span class="badge ${badgeClass}">${order.status}</span>
-                            <h4 style="color:#1e293b;font-size:1rem;font-weight:600;">${order.packageDetails || 'General Dispatch'}</h4>
-                            <div class="order-meta">
-                                <span>ID: <strong class="meta-val">${order.trackingId || 'N/A'}</strong></span>
-                                <span>Client: <strong class="meta-val">${order.customerName}</strong></span>
+                            <h4>${order.packageDetails || 'Request'}</h4>
+                            <p>Client: ${order.customerName}</p>
+                            <div class="btn-group">
+                                <button onclick="updateStatus('${order._id}', 'In Transit')" style="background:var(--accent)">Assign</button>
+                                <button onclick="updateStatus('${order._id}', 'Delivered')" style="background:var(--success)">Deliver</button>
                             </div>
-                            <div class="btn-group">${buttonsHtml}</div>
                         </div>`;
 
                     if (order.status === 'Delivered') { completedStream.innerHTML += cardHtml; completedCount++; }
@@ -183,20 +116,16 @@
 
                 document.getElementById('totalActiveCount').innerText = activeCount;
                 document.getElementById('totalDeliveredCount').innerText = completedCount;
-            } catch (err) {
-                console.error('Error drawing live feed:', err);
-            }
+            } catch (err) { console.error(err); }
         }
 
-        async function updateStatus(orderId, newStatus) {
-            try {
-                const res = await fetch(`/api/orders/${orderId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
-                    body: JSON.stringify({ status: newStatus })
-                });
-                if (res.ok) render();
-            } catch (err) { console.error('Failed to update status:', err); }
+        async function updateStatus(id, status) {
+            await fetch(`/api/orders/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
+                body: JSON.stringify({ status })
+            });
+            render();
         }
 
         setInterval(render, 5000);
