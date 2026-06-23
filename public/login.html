@@ -59,6 +59,20 @@
             letter-spacing: 1px;
         }
 
+        #loginErrorMessage {
+            background-color: #fee2e2;
+            color: #dc2626;
+            border: 2px solid #fecaca;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            display: none;
+            text-align: left;
+            box-sizing: border-box;
+        }
+
         .form-group {
             margin-bottom: 24px;
             text-align: left;
@@ -132,46 +146,60 @@
         <div class="brand-title">Comfort<span>Xpress</span></div>
         <div class="subtitle">Enterprise Control Panel</div>
         
-        <form id="loginForm" onsubmit="handleAuth(event)">
+        <div id="loginErrorMessage"></div>
+        
+        <form id="loginForm">
             <div class="form-group">
                 <label for="username">Operator Security ID</label>
-                <input type="text" id="username" class="form-control" placeholder="Enter Admin Username" required autocomplete="username">
+                <input type="text" id="username" class="form-control" placeholder="Enter Admin Username" autocomplete="username">
             </div>
             <div class="form-group">
-                <label for="password">Secure Passphrase</label>
-                <input type="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+                <label for="securePassphraseField">Secure Passphrase</label>
+                <input type="password" id="securePassphraseField" class="form-control" placeholder="••••••••" required autocomplete="current-password">
             </div>
             <button type="submit" class="btn-submit">Authorize Session</button>
         </form>
     </div>
 
     <script>
-        async function handleAuth(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const passwordInput = document.getElementById('securePassphraseField').value;
+            const errorMessageEl = document.getElementById('loginErrorMessage');
+            
             try {
                 const res = await fetch('/api/admin/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ passphrase: passwordInput })
                 });
 
                 const data = await res.json();
 
-                if (res.ok && data.token) {
-                    // Save the temporary short-lived cryptographically signed token
-                    localStorage.setItem('cx_session', data.token); 
-                    window.location.href = 'dashboard.html'; 
-                } else {
-                    alert(data.error || 'Authentication failed. Terminal connection rejected.');
+                if (!res.ok) {
+                    throw new Error(data.error || 'Authentication rejected.');
                 }
+
+                // Save the newly minted cryptographically signed JWT into session storage
+                localStorage.setItem('cx_session', data.token);
+                
+                // Authorization matrix confirmed -> route user to support desk terminal
+                window.location.replace('message.html');
+
             } catch (err) {
-                console.error('Login network error:', err);
-                alert('Connection error. Failed to reach the security authentication server.');
+                console.error('Login process error:', err);
+                if (errorMessageEl) {
+                    errorMessageEl.innerText = err.message;
+                    errorMessageEl.style.display = 'block';
+                } else {
+                    alert(err.message);
+                }
             }
         }
+
+        // Attach to your form submission handling structure
+        document.getElementById('loginForm').addEventListener('submit', handleLogin);
     </script>
 </body>
 </html>

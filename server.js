@@ -5,10 +5,10 @@
 
 require('dotenv').config();
 const crypto = require('crypto'); 
-const jwt = require('jsonwebtoken'); // Added for JWT operations
+const jwt = require('jsonwebtoken'); 
 
 // --- Environment variable guard ---
-const REQUIRED_ENV = ['MONGODB_URI', 'ADMIN_SECRET_KEY', 'JWT_SECRET']; // Added JWT_SECRET
+const REQUIRED_ENV = ['MONGODB_URI', 'ADMIN_SECRET_KEY', 'JWT_SECRET']; 
 const missing = REQUIRED_ENV.filter(key => !process.env[key]);
 if (missing.length > 0) {
     console.error(`\n❌ Missing required environment variables: ${missing.join(', ')}`);
@@ -98,23 +98,53 @@ mongoose.connect(process.env.MONGODB_URI, {
     process.exit(1);
 });
 
-// ─── API Routes ───────────────────────────────────────────────────────────────
+// ─── Local Token Middleware Alternative ──────────────────────────────────────
 
-// Admin Authorization Token Endpoint
-app.post('/api/admin/login', (req, res) => {
-    const { username, password } = req.body;
+const verifyAdminToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; 
 
-    if (username === 'admin' && password === process.env.ADMIN_SECRET_KEY) {
-        const token = jwt.sign({ role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        return res.json({ success: true, token });
+    if (!token) {
+        return res.status(401).json({ error: 'Access denied. Security token missing.' });
     }
 
-    return res.status(401).json({ error: 'Invalid security clearance.' });
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.adminUser = decoded;
+        next();
+    } catch (err) {
+        return res.status(403).json({ error: 'Invalid or expired security clearance token.' });
+    }
+};
+
+// ─── API Routes ───────────────────────────────────────────────────────────────
+
+// Secured Admin Authentication Endpoint
+app.post('/api/admin/login', (req, res) => {
+    const { username, password, passphrase } = req.body;
+    
+    // Fallback checks to support both old login systems and single-passphrase setups cleanly
+    const incomingSecret = passphrase || password;
+
+    if (!incomingSecret || incomingSecret !== process.env.ADMIN_SECRET_KEY) {
+        return res.status(401).json({ error: 'Invalid security clearance credentials.' });
+    }
+
+    // Role is assigned as 'admin' to preserve perfect synchronization with your WebSocket logic below
+    const token = jwt.sign(
+        { role: 'admin' }, 
+        process.env.JWT_SECRET, 
+        { expiresIn: '24h' }
+    );
+
+    return res.json({ success: true, token });
 });
 
 app.use('/api/orders',          orderRoutes);
 app.use('/api/track',           trackRoutes);
 app.use('/api/inquiries',       inquiryRoutes); 
+
+// Uses your dedicated external middleware file to guard the incoming admin routes
 app.use('/api/admin/inquiries', requireAdmin, adminInquiryRoutes); 
 
 app.get('/api/health', async (req, res) => {
@@ -147,7 +177,7 @@ io.on('connection', (socket) => {
         if (trackingId) socket.join(trackingId.trim().toUpperCase());
     });
 
-    // Updated to verify JWT signatures securely
+    // Verified via JWT signatures securely
     socket.on('joinAdminRoom', (adminToken) => {
         try {
             if (adminToken) {
@@ -161,7 +191,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Updated to use JWT signature extraction for dispatch controls
+    // Uses JWT signature extraction for dispatch controls
     socket.on('updateOrderStatus', async ({ trackingId, newStatus, adminToken }) => {
         try {
             const verified = jwt.verify(adminToken, process.env.JWT_SECRET);
