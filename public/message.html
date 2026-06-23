@@ -25,6 +25,7 @@
         .logo span { color: var(--accent); }
         .nav-links { list-style: none; flex-grow: 1; }
         .nav-links a { color: #e2e8f0; text-decoration: none; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
+        .nav-links a:hover { background: rgba(255,255,255,0.05); }
         .nav-links a.active { background: var(--primary); color: white; }
 
         /* Sidebar Profile Status Widget */
@@ -152,7 +153,7 @@
 
                 document.getElementById('inquiryCount').innerText = data.length;
 
-                // Clean out any old error notice boxes before writing rows
+                // Clean out any old notice boxes before writing rows
                 const oldNotice = document.getElementById('noMsgNotice');
                 if (oldNotice) oldNotice.remove();
 
@@ -187,8 +188,8 @@
                             <td><div class="msg-text-block">${item.messageBody || ''}</div></td>
                             <td>
                                 ${readBadge}
-                                <br>
                                 ${!item.read ? `
+                                <br>
                                 <button onclick="markRead('${item._id}')"
                                     style="margin-top:6px;font-size:0.75rem;padding:4px 8px;border-radius:4px;border:1px solid #cbd5e1;background:white;cursor:pointer;color:#475569;">
                                     Mark read
@@ -201,11 +202,10 @@
             } catch (err) {
                 console.error('Inquiry fetch error:', err);
                 tableEl.style.display = 'none';
-                
-                // Keep the structural wrap card but drop clear explicit feedback message
+
                 if (!document.getElementById('noMsgNotice')) {
                     containerEl.innerHTML += `
-                        <div id="noMsgNotice" class="no-orders" style="color:var(--danger); font-weight:600;">
+                        <div id="noMsgNotice" class="no-orders" style="color:var(--danger);font-weight:600;">
                             ${err.message.includes('401')
                                 ? 'Authentication error — check ADMIN_KEY matches your backend system config.'
                                 : 'Failed to sync with live web metrics. Check server logs.'}
@@ -218,10 +218,10 @@
         async function markRead(id) {
             try {
                 const res = await fetch(`/api/admin/inquiries/${id}/read`, {
-                    method: 'PUT', // Fixed from PATCH to match route file
-                    headers: { 
+                    method: 'PATCH', // ✅ FIXED: was incorrectly set to 'PUT' — route is router.patch()
+                    headers: {
                         'Content-Type': 'application/json',
-                        'x-admin-key': ADMIN_KEY 
+                        'x-admin-key': ADMIN_KEY
                     }
                 });
                 if (res.ok) {
@@ -230,7 +230,7 @@
                     console.error('Failed to update status code:', res.status);
                 }
             } catch (err) {
-                console.error('markRead error Context:', err);
+                console.error('markRead error:', err);
             }
         }
 
@@ -241,7 +241,7 @@
             socket.on('error', (err) => console.warn('Socket error state:', err));
         }
 
-        // Fallback safety polling
+        // Fallback safety polling every 30 seconds
         setInterval(loadInquiries, 30000);
         window.onload = loadInquiries;
     </script>
