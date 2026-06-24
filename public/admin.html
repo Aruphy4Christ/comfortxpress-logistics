@@ -18,14 +18,9 @@
         .top-bar { background: var(--primary); padding: 20px 40px; color: white; display: flex; justify-content: space-between; align-items: center; }
         .container { padding: 40px; }
         .order-entry-card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 30px; }
-        .form-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
-            gap: 15px; 
-            align-items: end; 
-        }
-        .form-grid input, .form-grid select { padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; width: 100%; }
-        .add-btn { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .form-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; align-items: end; }
+        .form-grid input, .form-grid select { padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; }
+        .add-btn { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; }
         table { width: 100%; border-collapse: collapse; background: white; margin-bottom: 30px; }
         th { background: #f1f5f9; padding: 16px; text-align: left; text-transform: uppercase; font-size: 0.75rem; color: #475569; }
         td { padding: 16px; border-bottom: 1px solid #e2e8f0; }
@@ -35,8 +30,8 @@
     <div class="app-container">
         <nav class="sidebar">
             <div class="logo">Comfort<span>Xpress</span></div>
-            <ul class="nav-links" style="list-style: none; margin-top: 20px;">
-                <li><a href="admin.html" style="color:white; text-decoration:none;"><i class="fas fa-lock"></i> Admin</a></li>
+            <ul class="nav-links">
+                <li><a href="admin.html" class="active"><i class="fas fa-lock"></i> Admin</a></li>
             </ul>
         </nav>
         <main class="main-content">
@@ -60,29 +55,19 @@
     </div>
 
     <script>
+        // Set credentials: 'include' for ALL requests to send cookies
         async function fetchOrders() {
             try {
-                const res = await fetch('/api/orders', { 
-                    method: 'GET',
-                    credentials: 'include',
-                    cache: 'no-cache' 
-                });
-                
+                const res = await fetch('/api/orders', { credentials: 'include' });
                 if (!res.ok) throw new Error('Unauthorized');
-                
                 const orders = await res.json();
                 const tbody = document.getElementById('activeOrdersBody');
-                
                 tbody.innerHTML = orders.map(order => `<tr>
-                    <td>${order.packageDetails}</td>
-                    <td>${order.trackingId}</td>
-                    <td>${order.customerName}</td>
+                    <td>${order.packageDetails}</td><td>${order.trackingId}</td><td>${order.customerName}</td>
                     <td>${order.status}</td>
-                    <td><button onclick="updateStatus('${order._id}', 'Delivered')" style="cursor:pointer;">Mark Delivered</button></td>
+                    <td><button onclick="updateStatus('${order._id}', 'Delivered')">Mark Delivered</button></td>
                 </tr>`).join('');
-            } catch (err) { 
-                console.error('Fetch error:', err); 
-            }
+            } catch (err) { console.error(err); }
         }
 
         async function createOrder() {
@@ -92,7 +77,6 @@
                 pickupAddress: document.getElementById('pickup').value,
                 dropoffAddress: document.getElementById('dropoff').value
             };
-            
             await fetch('/api/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
