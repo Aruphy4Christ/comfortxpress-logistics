@@ -103,16 +103,33 @@
 
                 document.getElementById('totalActiveCount').innerText = activeCount;
                 document.getElementById('totalDeliveredCount').innerText = completedCount;
-            } catch (err) { console.error(err); }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('activeStream').innerHTML =
+                    '<div style="color:#dc2626;text-align:center;padding:20px;">Failed to load rider requests — see browser console for details.</div>';
+            }
         }
 
         async function updateStatus(id, status) {
-            await fetch(`/api/orders/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status })
-            });
-            render();
+            try {
+                const res = await fetch(`/api/orders/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+
+                if (!res.ok) {
+                    const errText = await res.text();
+                    console.error('Update status failed:', res.status, errText);
+                    alert(`Could not update order status (HTTP ${res.status}). Check the console for details.`);
+                    return;
+                }
+
+                render();
+            } catch (err) {
+                console.error('Update status network error:', err);
+                alert('Could not reach the server while updating the order.');
+            }
         }
 
         setInterval(render, 5000);

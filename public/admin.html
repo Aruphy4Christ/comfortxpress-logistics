@@ -152,7 +152,11 @@
 
                 document.getElementById('activeCount').innerText = activeCount;
                 document.getElementById('completedCount').innerText = completedCount;
-            } catch (err) { console.error('Fetch error:', err); }
+            } catch (err) {
+                console.error('Fetch error:', err);
+                document.getElementById('activeOrdersBody').innerHTML =
+                    '<tr><td colspan="7" style="text-align:center;color:#dc2626;">Failed to load orders — see browser console for details.</td></tr>';
+            }
         }
 
         async function createOrder() {
@@ -166,21 +170,47 @@
                 origin: 'admin'
             };
 
-            await fetch('/api/orders', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-            fetchOrders();
+            try {
+                const res = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                if (!res.ok) {
+                    const errText = await res.text();
+                    console.error('Create order failed:', res.status, errText);
+                    alert(`Could not create order (HTTP ${res.status}). Check the console for details.`);
+                    return;
+                }
+
+                fetchOrders();
+            } catch (err) {
+                console.error('Create order network error:', err);
+                alert('Could not reach the server while creating the order.');
+            }
         }
 
         async function updateStatus(orderId, newStatus) {
-            await fetch(`/api/orders/${orderId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: newStatus })
-            });
-            fetchOrders();
+            try {
+                const res = await fetch(`/api/orders/${orderId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if (!res.ok) {
+                    const errText = await res.text();
+                    console.error('Update status failed:', res.status, errText);
+                    alert(`Could not update order status (HTTP ${res.status}). Check the console for details.`);
+                    return;
+                }
+
+                fetchOrders();
+            } catch (err) {
+                console.error('Update status network error:', err);
+                alert('Could not reach the server while updating the order.');
+            }
         }
 
         if (socket) {
