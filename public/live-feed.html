@@ -70,7 +70,8 @@
     <script>
         async function render() {
             try {
-                const res = await fetch('/api/orders');
+                // Added credentials: 'include'
+                const res = await fetch('/api/orders', { credentials: 'include' });
                 if (!res.ok) throw new Error('API Error');
                 const orders = await res.json();
 
@@ -112,9 +113,11 @@
 
         async function updateStatus(id, status) {
             try {
+                // Added credentials: 'include'
                 const res = await fetch(`/api/orders/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({ status })
                 });
 

@@ -62,11 +62,8 @@
     </main>
 
     <script>
-        // NOTE: there is no /api/stats endpoint in the backend, and no real data source
-        // for "System Load" or "Efficiency" in this app yet — these are illustrative
-        // placeholders, same as the very first version of this page. Let me know if
-        // you'd like these wired up to real numbers (e.g. live counts of pending /
-        // in-transit / delivered orders) and I'll build that endpoint.
+        // logout() is defined in auth-guard.js. 
+        // Including auth-guard.js at the top makes this globally available.
 
         window.onload = () => {
             const toast = document.getElementById('welcome-toast');

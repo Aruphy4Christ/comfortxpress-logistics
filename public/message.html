@@ -53,7 +53,7 @@
                         <tr><th>From</th><th>Email</th><th>Message</th><th>Date</th></tr>
                     </thead>
                     <tbody id="messageBody">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -61,12 +61,10 @@
 
     <script>
         // FETCH AND RENDER
-        // Was calling /api/messages, which doesn't exist on the backend. The real
-        // route is /api/admin/inquiries, and its records use fullName / emailAddress /
-        // messageBody (see models/Inquiry.js) rather than name / email / message.
         async function fetchMessages() {
             try {
-                const res = await fetch('/api/admin/inquiries');
+                // Added {credentials: 'include'} to send the session cookie
+                const res = await fetch('/api/admin/inquiries', { credentials: 'include' });
                 
                 if (!res.ok) throw new Error('Authorization failed');
                 

@@ -8,217 +8,94 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="/socket.io/socket.io.js"></script>
-
     <style>
-        :root {
-            --primary: #163961; --accent: #F5821F; --sidebar-dark: #0b1d32;
-            --white: #ffffff; --success: #22c55e; --danger: #ef4444; --transit: #2563eb;
-        }
+        :root { --primary: #163961; --accent: #F5821F; --sidebar-dark: #0b1d32; --white: #ffffff; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: #f8fafc; display: flex; min-height: 100vh; flex-direction: column; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; display: flex; min-height: 100vh; }
         .app-container { display: flex; flex: 1; }
-        .sidebar { width: 260px; background: var(--sidebar-dark); color: white; padding: 30px 20px; display: flex; flex-direction: column; justify-content: space-between; }
-        .logo { font-size: 1.4rem; font-weight: 800; margin-bottom: 40px; }
-        .logo span { color: var(--accent); }
-        .nav-links { list-style: none; flex-grow: 1; }
-        .nav-links a { color: #e2e8f0; text-decoration: none; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
-        .nav-links a.active { background: var(--primary); color: white; }
-        .sidebar-profile { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; }
+        .sidebar { width: 260px; background: var(--sidebar-dark); color: white; padding: 30px 20px; }
         .main-content { flex-grow: 1; display: flex; flex-direction: column; }
         .top-bar { background: var(--primary); padding: 20px 40px; color: white; display: flex; justify-content: space-between; align-items: center; }
-        .logout-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 6px; cursor: pointer; }
-        .container { padding: 40px; flex-grow: 1; }
+        .container { padding: 40px; }
         .order-entry-card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 30px; }
         .form-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; align-items: end; }
-        .form-grid input, .form-grid select { padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; width: 100%; }
-        .add-btn { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .form-grid input, .form-grid select { padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; }
+        .add-btn { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; }
         table { width: 100%; border-collapse: collapse; background: white; margin-bottom: 30px; }
-        th { background: #f1f5f9; padding: 16px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: #475569; }
+        th { background: #f1f5f9; padding: 16px; text-align: left; text-transform: uppercase; font-size: 0.75rem; color: #475569; }
         td { padding: 16px; border-bottom: 1px solid #e2e8f0; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
-        .badge-pending { background: #fee2e2; color: #991b1b; }
-        .badge-transit { background: #dbeafe; color: #1e40af; }
-        .badge-delivered { background: #dcfce7; color: #166534; }
-        .tag-origin { padding: 5px 10px; border-radius: 50px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
-        .tag-customer { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
-        .tag-admin { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
-        .action-dropdown { padding: 6px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; }
-        .no-orders { padding: 20px; text-align: center; color: #94a3b8; background: white; border: 1px dashed #cbd5e1; margin-bottom: 30px; }
     </style>
 </head>
 <body>
-
     <div class="app-container">
         <nav class="sidebar">
             <div class="logo">Comfort<span>Xpress</span></div>
             <ul class="nav-links">
-                <li><a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
-                <li><a href="live-feed.html"><i class="fas fa-satellite-dish"></i> Rider Requests</a></li>
                 <li><a href="admin.html" class="active"><i class="fas fa-lock"></i> Admin</a></li>
-                <li><a href="message.html"><i class="fas fa-comment-alt"></i> Contact Us</a></li>
             </ul>
-            <div class="sidebar-profile">
-                <i class="fas fa-user-circle"></i>
-                <div class="profile-info"><h4>System Admin</h4><p><span class="status-dot"></span> Admin Is In</p></div>
-            </div>
         </nav>
-
         <main class="main-content">
-            <header class="top-bar">
-                <h2><i class="fas fa-lock"></i> Admin Control Panel</h2>
-                <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
-            </header>
-
+            <header class="top-bar"><h2>Admin Control Panel</h2></header>
             <div class="container">
                 <section class="order-entry-card">
-                    <h3>Create New Order (Manual Admin Entry)</h3>
                     <div class="form-grid">
                         <input type="text" id="cName" placeholder="Customer Name">
-                        <select id="pType">
-                            <option value="Personal Delivery">Personal Delivery</option>
-                            <option value="Corporate Dispatch">Corporate Dispatch</option>
-                            <option value="Bulk/Express Courier">Bulk/Express Courier</option>
-                        </select>
+                        <select id="pType"><option>Personal Delivery</option><option>Corporate Dispatch</option></select>
                         <input type="text" id="pickup" placeholder="Pickup Address">
                         <input type="text" id="dropoff" placeholder="Dropoff Address">
                         <button class="add-btn" onclick="createOrder()">Add Order</button>
                     </div>
                 </section>
-
-                <div class="section-title">Active Shipments <span id="activeCount">0</span></div>
-                <div id="activeContainer">
-                    <table id="activeOrdersTable">
-                        <thead><tr><th>Logistics</th><th>Tracking ID</th><th>Customer</th><th>Channel</th><th>Route</th><th>Status</th><th>Action</th></tr></thead>
-                        <tbody id="activeOrdersBody"></tbody>
-                    </table>
-                </div>
-
-                <div class="section-title">Completed Deliveries <span id="completedCount">0</span></div>
-                <div id="completedContainer">
-                    <table id="deliveredOrdersTable">
-                        <thead><tr><th>Logistics</th><th>Tracking ID</th><th>Customer</th><th>Channel</th><th>Route</th><th>Status</th><th>Action</th></tr></thead>
-                        <tbody id="deliveredOrdersBody"></tbody>
-                    </table>
-                </div>
+                <table id="activeOrdersTable">
+                    <thead><tr><th>Details</th><th>Tracking ID</th><th>Customer</th><th>Status</th><th>Action</th></tr></thead>
+                    <tbody id="activeOrdersBody"></tbody>
+                </table>
             </div>
-            <footer>&copy; 2026 ComfortXpress Admin Portal.</footer>
         </main>
     </div>
 
     <script>
-        // ─── SOCKET ───
-        let socket;
-        try {
-            socket = io();
-            socket.emit('joinAdminRoom');
-        } catch (e) { console.warn('Socket init failed.'); }
-
+        // Set credentials: 'include' for ALL requests to send cookies
         async function fetchOrders() {
             try {
-                const res = await fetch('/api/orders');
-                if (!res.ok) throw new Error('API Authorization failed.');
+                const res = await fetch('/api/orders', { credentials: 'include' });
+                if (!res.ok) throw new Error('Unauthorized');
                 const orders = await res.json();
-
-                const activeTbody = document.getElementById('activeOrdersBody');
-                const deliveredTbody = document.getElementById('deliveredOrdersBody');
-                activeTbody.innerHTML = '';
-                deliveredTbody.innerHTML = '';
-
-                let activeCount = 0, completedCount = 0;
-
-                orders.forEach(order => {
-                    let badgeClass = order.status === 'Delivered' ? 'badge-delivered' : (order.status === 'In Transit' ? 'badge-transit' : 'badge-pending');
-                    const originTag = order.origin === 'customer' ? `<span class="tag-origin tag-customer">Client App</span>` : `<span class="tag-origin tag-admin">Desk Entry</span>`;
-                    
-                    const rowHtml = `<tr>
-                        <td><strong>${order.packageDetails || 'Standard'}</strong></td>
-                        <td><strong>${order.trackingId || 'N/A'}</strong></td>
-                        <td>${order.customerName || 'Guest'}</td>
-                        <td>${originTag}</td>
-                        <td>${order.pickupAddress} &rarr; ${order.dropoffAddress}</td>
-                        <td><span class="badge ${badgeClass}">${order.status || 'Pending'}</span></td>
-                        <td>
-                            <select class="action-dropdown" onchange="updateStatus('${order._id}', this.value)">
-                                <option value="Pending" ${order.status==='Pending'?'selected':''}>Pending</option>
-                                <option value="In Transit" ${order.status==='In Transit'?'selected':''}>In Transit</option>
-                                <option value="Delivered" ${order.status==='Delivered'?'selected':''}>Delivered</option>
-                            </select>
-                        </td>
-                    </tr>`;
-
-                    if (order.status === 'Delivered') { deliveredTbody.innerHTML += rowHtml; completedCount++; }
-                    else { activeTbody.innerHTML += rowHtml; activeCount++; }
-                });
-
-                document.getElementById('activeCount').innerText = activeCount;
-                document.getElementById('completedCount').innerText = completedCount;
-            } catch (err) {
-                console.error('Fetch error:', err);
-                document.getElementById('activeOrdersBody').innerHTML =
-                    '<tr><td colspan="7" style="text-align:center;color:#dc2626;">Failed to load orders — see browser console for details.</td></tr>';
-            }
+                const tbody = document.getElementById('activeOrdersBody');
+                tbody.innerHTML = orders.map(order => `<tr>
+                    <td>${order.packageDetails}</td><td>${order.trackingId}</td><td>${order.customerName}</td>
+                    <td>${order.status}</td>
+                    <td><button onclick="updateStatus('${order._id}', 'Delivered')">Mark Delivered</button></td>
+                </tr>`).join('');
+            } catch (err) { console.error(err); }
         }
 
         async function createOrder() {
             const body = {
-                trackingId: 'CX-ADM' + Math.floor(Math.random() * 90000 + 10000),
                 customerName: document.getElementById('cName').value,
                 packageDetails: document.getElementById('pType').value,
                 pickupAddress: document.getElementById('pickup').value,
-                dropoffAddress: document.getElementById('dropoff').value,
-                status: 'Pending',
-                origin: 'admin'
+                dropoffAddress: document.getElementById('dropoff').value
             };
-
-            try {
-                const res = await fetch('/api/orders', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
-                });
-
-                if (!res.ok) {
-                    const errText = await res.text();
-                    console.error('Create order failed:', res.status, errText);
-                    alert(`Could not create order (HTTP ${res.status}). Check the console for details.`);
-                    return;
-                }
-
-                fetchOrders();
-            } catch (err) {
-                console.error('Create order network error:', err);
-                alert('Could not reach the server while creating the order.');
-            }
+            await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(body)
+            });
+            fetchOrders();
         }
 
-        async function updateStatus(orderId, newStatus) {
-            try {
-                const res = await fetch(`/api/orders/${orderId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: newStatus })
-                });
-
-                if (!res.ok) {
-                    const errText = await res.text();
-                    console.error('Update status failed:', res.status, errText);
-                    alert(`Could not update order status (HTTP ${res.status}). Check the console for details.`);
-                    return;
-                }
-
-                fetchOrders();
-            } catch (err) {
-                console.error('Update status network error:', err);
-                alert('Could not reach the server while updating the order.');
-            }
+        async function updateStatus(id, status) {
+            await fetch(`/api/orders/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ status })
+            });
+            fetchOrders();
         }
 
-        if (socket) {
-            socket.on('newOrderCreated', fetchOrders);
-            socket.on('orderUpdated', fetchOrders);
-        }
-
-        setInterval(fetchOrders, 5000);
         window.onload = fetchOrders;
     </script>
 </body>
