@@ -55,19 +55,30 @@
     </div>
 
     <script>
-        // Set credentials: 'include' for ALL requests to send cookies
+        // Updated to include cache: 'no-cache' to force fresh data fetches
         async function fetchOrders() {
             try {
-                const res = await fetch('/api/orders', { credentials: 'include' });
+                const res = await fetch('/api/orders', { 
+                    method: 'GET',
+                    credentials: 'include',
+                    cache: 'no-cache' 
+                });
+                
                 if (!res.ok) throw new Error('Unauthorized');
+                
                 const orders = await res.json();
                 const tbody = document.getElementById('activeOrdersBody');
+                
                 tbody.innerHTML = orders.map(order => `<tr>
-                    <td>${order.packageDetails}</td><td>${order.trackingId}</td><td>${order.customerName}</td>
+                    <td>${order.packageDetails}</td>
+                    <td>${order.trackingId}</td>
+                    <td>${order.customerName}</td>
                     <td>${order.status}</td>
                     <td><button onclick="updateStatus('${order._id}', 'Delivered')">Mark Delivered</button></td>
                 </tr>`).join('');
-            } catch (err) { console.error(err); }
+            } catch (err) { 
+                console.error('Fetch error:', err); 
+            }
         }
 
         async function createOrder() {
@@ -77,6 +88,7 @@
                 pickupAddress: document.getElementById('pickup').value,
                 dropoffAddress: document.getElementById('dropoff').value
             };
+            
             await fetch('/api/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
