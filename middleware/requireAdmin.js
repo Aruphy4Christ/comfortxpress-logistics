@@ -1,33 +1,26 @@
+'use strict';
 /**
- * ComfortXpress Logistics — Admin Authentication Middleware
- * Validates JSON Web Tokens sent via the Authorization header to protect admin endpoints.
+ * requireAdmin — verifies the signed cx_session cookie issued by POST /api/auth/login.
+ *
+ * Previously compared req.headers['x-admin-key'] / req.query.key against a single static
+ * ADMIN_SECRET_KEY value that also lived hardcoded in message.html's source — meaning anyone
+ * who viewed the page source had full admin access with no login at all. This version requires
+ * a token that can only have been issued by the server after a correct username/password check,
+ * and that token can't be forged without JWT_SECRET (which never leaves the server).
  */
-
 const jwt = require('jsonwebtoken');
 
-module.exports = (req, res, next) => {
-    // Extract the Authorization header from the incoming request
-    const authHeader = req.headers['authorization'];
-    
-    // Split the header value ("Bearer <token>") to isolate the token string
-    const token = authHeader && authHeader.split(' ')[1]; 
+module.exports = function requireAdmin(req, res, next) {
+    const token = req.cookies ? req.cookies['cx_session'] : null;
 
-    // Reject the request if no token was attached
     if (!token) {
-        return res.status(401).json({ error: 'Access denied. No token provided.' });
+        return res.status(401).json({ error: 'Unauthorized' });
     }
 
     try {
-        // Cryptographically verify the token signature against your environment variable
-        const verified = jwt.verify(token, process.env.JWT_SECRET);
-        
-        // Attach the validated token payload payload (e.g., role: 'admin') to the request object
-        req.admin = verified; 
-        
-        // Pass control to the next route handler
+        req.admin = jwt.verify(token, process.env.JWT_SECRET);
         next();
     } catch (err) {
-        // Return a 403 Forbidden status if the signature is invalid or token has expired
-        return res.status(403).json({ error: 'Invalid or expired token.' });
+        return res.status(401).json({ error: 'Unauthorized' });
     }
 };

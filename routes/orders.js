@@ -4,8 +4,8 @@
  * Order Routes — /api/orders
  *
  * POST   /          — create new order (public + admin desk)
- * GET    /          — list all orders  (admin — requireAdmin applied at mount in server.js)
- * PUT    /:id       — update order     (admin — requireAdmin applied at mount in server.js)
+ * GET    /          — list all orders  (admin — requireAdmin)
+ * PUT    /:id       — update order     (admin — requireAdmin)
  * GET    /:trackingId — fetch single order by tracking ID (public)
  */
 
@@ -14,11 +14,6 @@ const { body, param, validationResult } = require('express-validator');
 const mongoose  = require('mongoose');
 const Order     = require('../models/Order');
 
-// FIX 1: was '../middleware/adminAuth' — file doesn't exist, correct name is requireAdmin
-// FIX 2: adminAuth removed from individual routes — protection is now applied at the
-//         mount level in server.js for admin-only endpoints, keeping GET / open to
-//         admin HTML pages that call fetch('/api/orders') without needing extra headers.
-//         Public POST and GET /:trackingId remain fully open as intended.
 const requireAdmin = require('../middleware/requireAdmin');
 
 const router = express.Router();
@@ -84,9 +79,6 @@ router.post(
             // Real-time broadcast to admin board
             io.to('admin-room').emit('newOrderCreated', newOrder);
 
-            // FIX 3: telegramAlert was called unconditionally — app.set('sendTelegramAlert')
-            // was never registered in server.js, so it was undefined and threw TypeError.
-            // Guard it so it only fires when actually configured.
             const telegramAlert = req.app.get('sendTelegramAlert');
             if (typeof telegramAlert === 'function') {
                 telegramAlert(newOrder);
@@ -103,9 +95,6 @@ router.post(
 );
 
 // ─── GET / — List all orders (admin only) ────────────────────────────────────
-// requireAdmin is applied here at route level AND at the server.js mount level
-// for the dedicated admin route. Public admin HTML pages use fetch('/api/orders')
-// with the x-admin-key header already set in their ADMIN_KEY config.
 router.get('/', requireAdmin, async (req, res) => {
     try {
         const orders = await Order.find().sort({ createdAt: -1 }).lean();

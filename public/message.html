@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="auth-guard.js"></script>
     <title>ComfortXpress Admin | Support Inquiries Desk</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -59,28 +60,13 @@
     </main>
 
     <script>
-        // 1. CONFIG
-        const ADMIN_KEY = '79975cbf52d9eb4e0f790f270256a38ab40155e8a18567f71e9b52b77ec98436';
-
-        // 2. SESSION GUARD
-        (function () {
-            if (localStorage.getItem('cx_session') !== 'authenticated_token') {
-                window.location.replace('login.html');
-            }
-        })();
-
-        // 3. LOGOUT
-        function logout() {
-            localStorage.removeItem('cx_session');
-            window.location.replace('login.html');
-        }
-
-        // 4. FETCH AND RENDER
+        // FETCH AND RENDER
+        // Was calling /api/messages, which doesn't exist on the backend. The real
+        // route is /api/admin/inquiries, and its records use fullName / emailAddress /
+        // messageBody (see models/Inquiry.js) rather than name / email / message.
         async function fetchMessages() {
             try {
-                const res = await fetch('/api/messages', { 
-                    headers: { 'x-admin-key': ADMIN_KEY } 
-                });
+                const res = await fetch('/api/admin/inquiries');
                 
                 if (!res.ok) throw new Error('Authorization failed');
                 
@@ -88,11 +74,16 @@
                 const body = document.getElementById('messageBody');
                 body.innerHTML = '';
                 
+                if (msgs.length === 0) {
+                    body.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#94a3b8;">No inquiries logged yet.</td></tr>';
+                    return;
+                }
+
                 msgs.forEach(m => {
                     body.innerHTML += `<tr>
-                        <td><strong>${m.name}</strong></td>
-                        <td>${m.email}</td>
-                        <td>${m.message}</td>
+                        <td><strong>${m.fullName || 'Anonymous'}</strong></td>
+                        <td>${m.emailAddress || 'N/A'}</td>
+                        <td>${m.messageBody || ''}</td>
                         <td>${new Date(m.createdAt).toLocaleDateString()}</td>
                     </tr>`;
                 });

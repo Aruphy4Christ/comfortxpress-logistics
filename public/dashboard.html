@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="auth-guard.js"></script>
     <title>ComfortXpress Admin | Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -53,49 +54,24 @@
 
         <div class="container">
             <div class="stats-grid">
-                <div class="stat-card"><h3>System Load</h3><p id="load-val">--%</p></div>
-                <div class="stat-card"><h3>Active Riders</h3><p id="riders-val">--</p></div>
-                <div class="stat-card"><h3>Efficiency</h3><p id="eff-val">--%</p></div>
+                <div class="stat-card"><h3>System Load</h3><p id="load-val">24%</p></div>
+                <div class="stat-card"><h3>Active Riders</h3><p id="riders-val">12</p></div>
+                <div class="stat-card"><h3>Efficiency</h3><p id="eff-val">98%</p></div>
             </div>
         </div>
     </main>
 
     <script>
-        // 1. GLOBAL AUTH CONFIG
-        const ADMIN_KEY = '79975cbf52d9eb4e0f790f270256a38ab40155e8a18567f71e9b52b77ec98436';
-
-        // 2. SESSION GUARD
-        (function () {
-            if (localStorage.getItem('cx_session') !== 'authenticated_token') {
-                window.location.replace('login.html');
-            }
-        })();
-
-        // 3. FETCH DASHBOARD METRICS
-        async function updateDashboard() {
-            try {
-                const res = await fetch('/api/stats', { 
-                    headers: { 'x-admin-key': ADMIN_KEY } 
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    document.getElementById('load-val').innerText = data.load + '%';
-                    document.getElementById('riders-val').innerText = data.riders;
-                    document.getElementById('eff-val').innerText = data.efficiency + '%';
-                }
-            } catch (err) { console.error('Metrics fetch failed'); }
-        }
-
-        function logout() {
-            localStorage.removeItem('cx_session');
-            window.location.replace('login.html');
-        }
+        // NOTE: there is no /api/stats endpoint in the backend, and no real data source
+        // for "System Load" or "Efficiency" in this app yet — these are illustrative
+        // placeholders, same as the very first version of this page. Let me know if
+        // you'd like these wired up to real numbers (e.g. live counts of pending /
+        // in-transit / delivered orders) and I'll build that endpoint.
 
         window.onload = () => {
             const toast = document.getElementById('welcome-toast');
             toast.style.display = 'block';
             setTimeout(() => { toast.style.display = 'none'; }, 3000);
-            updateDashboard();
         };
     </script>
 </body>

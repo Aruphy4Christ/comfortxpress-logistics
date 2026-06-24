@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="auth-guard.js"></script>
     <title>ComfortXpress Admin | Control Panel</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -105,32 +106,16 @@
     </div>
 
     <script>
-        const ADMIN_KEY = '79975cbf52d9eb4e0f790f270256a38ab40155e8a18567f71e9b52b77ec98436';
-
-        // ─── SESSION GUARD ───
-        (function () {
-            if (localStorage.getItem('cx_session') !== 'authenticated_token') {
-                window.location.replace('login.html');
-            }
-        })();
-
-        function logout() {
-            localStorage.removeItem('cx_session');
-            window.location.replace('login.html');
-        }
-
         // ─── SOCKET ───
         let socket;
         try {
-            socket = io({ auth: { token: ADMIN_KEY } });
+            socket = io();
             socket.emit('joinAdminRoom');
         } catch (e) { console.warn('Socket init failed.'); }
 
         async function fetchOrders() {
             try {
-                const res = await fetch('/api/orders', { 
-                    headers: { 'x-admin-key': ADMIN_KEY } 
-                });
+                const res = await fetch('/api/orders');
                 if (!res.ok) throw new Error('API Authorization failed.');
                 const orders = await res.json();
 
@@ -183,7 +168,7 @@
 
             await fetch('/api/orders', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
             fetchOrders();
@@ -192,7 +177,7 @@
         async function updateStatus(orderId, newStatus) {
             await fetch(`/api/orders/${orderId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus })
             });
             fetchOrders();

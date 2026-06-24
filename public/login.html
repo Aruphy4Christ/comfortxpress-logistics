@@ -73,23 +73,23 @@
             
             const errorMessageEl = document.getElementById('loginErrorMessage');
             const username = document.getElementById('username').value;
-            const passphrase = document.getElementById('securePassphraseField').value;
+            const password = document.getElementById('securePassphraseField').value;
             
             try {
-                const res = await fetch('/api/admin/login', {
+                const res = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, passphrase })
+                    body: JSON.stringify({ username, password })
                 });
 
                 const data = await res.json();
 
                 if (res.ok) {
-                    // Set the EXACT token your other pages are checking for
+                    // UX flag only — the real session lives in the httpOnly cookie the server just set.
                     localStorage.setItem('cx_session', 'authenticated_token');
                     window.location.replace('dashboard.html');
                 } else {
-                    throw new Error(data.message || 'Invalid security clearance.');
+                    throw new Error(data.error || 'Invalid security clearance.');
                 }
             } catch (err) {
                 errorMessageEl.innerText = err.message;
