@@ -6,29 +6,27 @@
     <title>About Us | ComfortXpress</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* Modern reset and layout structure */
         body { margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
         
-        /* main now has a top margin to detach it from the navigation bar */
-        main { 
-            flex: 1; 
-            padding-top: 40px; 
-            margin-top: 40px; 
-        }
+        main { flex: 1; padding: 40px 20px; margin-top: 40px; }
         
+        /* Container for the overall page content */
+        .content-wrapper { max-width: 1000px; margin: 0 auto; }
+
+        /* Business Section */
+        .business-section { margin-bottom: 60px; }
+        
+        /* CEO Section (Grid) */
         .ceo-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 60px;
             align-items: start;
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 20px;
         }
         
         .ceo-image-container {
             width: 100%;
-            height: 450px;
+            height: 400px;
             border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
@@ -40,10 +38,8 @@
             object-fit: cover;
         }
 
-        /* Mobile responsiveness */
         @media (max-width: 768px) {
             .ceo-grid { grid-template-columns: 1fr; }
-            main { margin-top: 20px; }
         }
     </style>
 </head>
@@ -63,19 +59,29 @@
     </header>
 
     <main>
-        <section class="ceo-grid">
-            <div class="ceo-image-container">
-                <!-- Corrected path confirmed from your repository -->
-                <img src="/css/assets/ceo.jpeg" alt="Opeyemi Fakayode - CEO">
-            </div>
-            <div>
-                <h2 style="margin-top: 0; color: #163961;">Opeyemi Fakayode</h2>
-                <h4 style="color: #64748b; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem;">Founder & Chief Executive Officer</h4>
-                <p style="line-height: 1.8; color: #334155; margin-top: 20px;">
-                    Opeyemi Fakayode is a shrewd business woman and operational strategist with over 5 years of domain experience spearheading freight delivery logistics and structural growth policies. Her leadership has transformed ComfortXpress from a local dispatch service into an enterprise delivery platform.
+        <div class="content-wrapper">
+            <!-- Business Section -->
+            <section class="business-section">
+                <h2 style="color: #163961;">About ComfortXpress</h2>
+                <p style="line-height: 1.8; color: #334155; font-size: 1.1rem;">
+                    ComfortXpress is an enterprise delivery platform dedicated to transforming local dispatch services into streamlined, efficient logistics solutions. We bridge the gap between businesses and their customers with reliable structural growth policies and fast, secure freight delivery.
                 </p>
-            </div>
-        </section>
+            </section>
+
+            <!-- CEO Section -->
+            <section class="ceo-grid">
+                <div class="ceo-image-container">
+                    <img src="/css/assets/ceo.jpeg" alt="Opeyemi Fakayode - CEO">
+                </div>
+                <div>
+                    <h2 style="margin-top: 0; color: #163961;">Meet Our CEO</h2>
+                    <h4 style="color: #64748b; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem;">Opeyemi Fakayode</h4>
+                    <p style="line-height: 1.8; color: #334155; margin-top: 20px;">
+                        Opeyemi Fakayode is a shrewd business woman and operational strategist with over 5 years of domain experience spearheading freight delivery logistics. Her leadership has transformed ComfortXpress from a local dispatch service into an enterprise delivery platform.
+                    </p>
+                </div>
+            </section>
+        </div>
     </main>
 
     <footer>
