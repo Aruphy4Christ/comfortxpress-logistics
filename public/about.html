@@ -6,39 +6,34 @@
     <title>About Us | ComfortXpress</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* Ensures footer stays at the bottom and content has breathing room */
-        main {
-            padding: 60px 0;
-            min-height: calc(100vh - 200px);
-        }
+        /* Force body to take full screen height */
+        body { min-height: 100vh; display: flex; flex-direction: column; margin: 0; }
+        
+        /* Flex-grow ensures this section takes all available middle space */
+        main { flex: 1; padding: 60px 0; display: flex; align-items: center; }
         
         .ceo-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 40px;
+            gap: 60px; /* Increased gap for a more premium look */
             align-items: center;
-            max-width: 1100px;
+            max-width: 1000px; /* Slightly tighter width for better readability */
             margin: 0 auto;
             padding: 0 20px;
         }
         
         .ceo-image-container {
             width: 100%;
-            height: 500px;
-            border-radius: 16px;
+            height: 450px;
+            border-radius: 20px; /* Softer, modern edges */
             overflow: hidden;
-            background: #e2e8f0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); /* Subtle shadow for depth */
         }
         
         .ceo-image-container img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-        }
-
-        /* Responsive adjustment for smaller screens */
-        @media (max-width: 768px) {
-            .ceo-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -60,12 +55,11 @@
     <main>
         <section class="ceo-grid">
             <div class="ceo-image-container">
-                <!-- Using the confirmed path from your GitHub repository -->
                 <img src="/css/assets/ceo.jpeg" alt="Opeyemi Fakayode - CEO">
             </div>
             <div>
-                <h2 style="margin-top: 0;">Opeyemi Fakayode</h2>
-                <h4 style="color: #475569;">Founder & Chief Executive Officer</h4>
+                <h2 style="margin-top: 0; color: #163961;">Opeyemi Fakayode</h2>
+                <h4 style="color: #64748b; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem;">Founder & Chief Executive Officer</h4>
                 <p style="line-height: 1.8; color: #334155; margin-top: 20px;">
                     Opeyemi Fakayode is a shrewd business woman and operational strategist with over 5 years of domain experience spearheading freight delivery logistics and structural growth policies. Her leadership has transformed ComfortXpress from a local dispatch service into an enterprise delivery platform.
                 </p>
@@ -74,8 +68,8 @@
     </main>
 
     <footer>
-        <div class="footer-bottom" style="text-align: center; padding: 20px; border-top: 1px solid #e2e8f0;">
-            <p>&copy; 2026 ComfortXpress Logistics. All Rights Reserved.</p>
+        <div style="text-align: center; padding: 30px; border-top: 1px solid #f1f5f9;">
+            <p style="color: #64748b; font-size: 0.9rem;">&copy; 2026 ComfortXpress Logistics. All Rights Reserved.</p>
         </div>
     </footer>
 
