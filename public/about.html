@@ -6,18 +6,22 @@
     <title>About Us | ComfortXpress</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* Force body to take full screen height */
-        body { min-height: 100vh; display: flex; flex-direction: column; margin: 0; }
+        /* Modern reset and layout structure */
+        body { margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
         
-        /* Flex-grow ensures this section takes all available middle space */
-        main { flex: 1; padding: 60px 0; display: flex; align-items: center; }
+        /* main now has a top margin to detach it from the navigation bar */
+        main { 
+            flex: 1; 
+            padding-top: 40px; 
+            margin-top: 40px; 
+        }
         
         .ceo-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 60px; /* Increased gap for a more premium look */
-            align-items: center;
-            max-width: 1000px; /* Slightly tighter width for better readability */
+            gap: 60px;
+            align-items: start;
+            max-width: 1100px;
             margin: 0 auto;
             padding: 0 20px;
         }
@@ -25,15 +29,21 @@
         .ceo-image-container {
             width: 100%;
             height: 450px;
-            border-radius: 20px; /* Softer, modern edges */
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
         
         .ceo-image-container img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .ceo-grid { grid-template-columns: 1fr; }
+            main { margin-top: 20px; }
         }
     </style>
 </head>
@@ -55,6 +65,7 @@
     <main>
         <section class="ceo-grid">
             <div class="ceo-image-container">
+                <!-- Corrected path confirmed from your repository -->
                 <img src="/css/assets/ceo.jpeg" alt="Opeyemi Fakayode - CEO">
             </div>
             <div>
