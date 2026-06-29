@@ -9,13 +9,20 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        :root { --primary: #163961; --accent: #F5821F; --sidebar-dark: #0b1d32; --white: #ffffff; }
+        :root { --primary: #163961; --accent: #F5821F; --sidebar-dark: #0b1d32; --white: #ffffff; --success: #22c55e; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: #f8fafc; display: flex; min-height: 100vh; }
         .app-container { display: flex; flex: 1; }
-        .sidebar { width: 260px; background: var(--sidebar-dark); color: white; padding: 30px 20px; }
+        .sidebar { width: 260px; background: var(--sidebar-dark); color: white; padding: 30px 20px; display: flex; flex-direction: column; }
+        .logo { font-size: 1.4rem; font-weight: 800; margin-bottom: 40px; }
+        .logo span { color: var(--accent); }
+        .nav-links { list-style: none; flex-grow: 1; }
+        .nav-links a { color: #e2e8f0; text-decoration: none; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
+        .nav-links a:hover { background: rgba(255,255,255,0.05); }
+        .nav-links a.active { background: var(--primary); color: white; }
         .main-content { flex-grow: 1; display: flex; flex-direction: column; }
         .top-bar { background: var(--primary); padding: 20px 40px; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .logout-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 6px; cursor: pointer; }
         .container { padding: 40px; }
         .order-entry-card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 30px; }
         .form-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; align-items: end; }
@@ -24,6 +31,11 @@
         table { width: 100%; border-collapse: collapse; background: white; margin-bottom: 30px; }
         th { background: #f1f5f9; padding: 16px; text-align: left; text-transform: uppercase; font-size: 0.75rem; color: #475569; }
         td { padding: 16px; border-bottom: 1px solid #e2e8f0; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+        .badge-pending { background: #fee2e2; color: #991b1b; }
+        .badge-transit { background: #dbeafe; color: #1e40af; }
+        .badge-delivered { background: #dcfce7; color: #166534; }
+        .action-dropdown { padding: 6px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -31,11 +43,17 @@
         <nav class="sidebar">
             <div class="logo">Comfort<span>Xpress</span></div>
             <ul class="nav-links">
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="live-feed.html"><i class="fas fa-satellite-dish"></i> Rider Requests</a></li>
                 <li><a href="admin.html" class="active"><i class="fas fa-lock"></i> Admin</a></li>
+                <li><a href="message.html"><i class="fas fa-comment-alt"></i> Contact Us</a></li>
             </ul>
         </nav>
         <main class="main-content">
-            <header class="top-bar"><h2>Admin Control Panel</h2></header>
+            <header class="top-bar">
+                <h2>Admin Control Panel</h2>
+                <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </header>
             <div class="container">
                 <section class="order-entry-card">
                     <div class="form-grid">
@@ -55,18 +73,29 @@
     </div>
 
     <script>
-        // Set credentials: 'include' for ALL requests to send cookies
         async function fetchOrders() {
             try {
                 const res = await fetch('/api/orders', { credentials: 'include' });
                 if (!res.ok) throw new Error('Unauthorized');
                 const orders = await res.json();
                 const tbody = document.getElementById('activeOrdersBody');
-                tbody.innerHTML = orders.map(order => `<tr>
-                    <td>${order.packageDetails}</td><td>${order.trackingId}</td><td>${order.customerName}</td>
-                    <td>${order.status}</td>
-                    <td><button onclick="updateStatus('${order._id}', 'Delivered')">Mark Delivered</button></td>
-                </tr>`).join('');
+                tbody.innerHTML = orders.map(order => {
+                    let badgeClass = 'badge-pending';
+                    if (order.status === 'In Transit') badgeClass = 'badge-transit';
+                    if (order.status === 'Delivered') badgeClass = 'badge-delivered';
+
+                    return `<tr>
+                        <td>${order.packageDetails}</td><td>${order.trackingId}</td><td>${order.customerName}</td>
+                        <td><span class="badge ${badgeClass}">${order.status}</span></td>
+                        <td>
+                            <select class="action-dropdown" onchange="updateStatus('${order._id}', this.value)">
+                                <option value="Pending" ${order.status==='Pending'?'selected':''}>Pending</option>
+                                <option value="In Transit" ${order.status==='In Transit'?'selected':''}>In Transit</option>
+                                <option value="Delivered" ${order.status==='Delivered'?'selected':''}>Delivered</option>
+                            </select>
+                        </td>
+                    </tr>`;
+                }).join('');
             } catch (err) { console.error(err); }
         }
 
@@ -75,25 +104,53 @@
                 customerName: document.getElementById('cName').value,
                 packageDetails: document.getElementById('pType').value,
                 pickupAddress: document.getElementById('pickup').value,
-                dropoffAddress: document.getElementById('dropoff').value
+                dropoffAddress: document.getElementById('dropoff').value,
+                status: 'Pending',
+                origin: 'admin'
             };
-            await fetch('/api/orders', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify(body)
-            });
-            fetchOrders();
+
+            try {
+                const res = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(body)
+                });
+
+                if (!res.ok) {
+                    const errText = await res.text();
+                    console.error('Create order failed:', res.status, errText);
+                    alert(`Could not create order (HTTP ${res.status}).`);
+                    return;
+                }
+
+                fetchOrders();
+            } catch (err) {
+                console.error(err);
+                alert('Could not reach the server while creating the order.');
+            }
         }
 
         async function updateStatus(id, status) {
-            await fetch(`/api/orders/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ status })
-            });
-            fetchOrders();
+            try {
+                const res = await fetch(`/api/orders/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ status })
+                });
+
+                if (!res.ok) {
+                    console.error('Update status failed:', res.status);
+                    alert(`Could not update order status (HTTP ${res.status}).`);
+                    return;
+                }
+
+                fetchOrders();
+            } catch (err) {
+                console.error(err);
+                alert('Could not reach the server while updating the order.');
+            }
         }
 
         window.onload = fetchOrders;

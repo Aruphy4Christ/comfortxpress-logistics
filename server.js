@@ -36,6 +36,7 @@ const inquiryRoutes      = require('./routes/inquiries');       // Public
 const adminInquiryRoutes = require('./routes/adminInquiries'); // Admin Only
 const authRoutes         = require('./routes/auth');           // New: login/logout/me
 const Order              = require('./models/Order');
+const { sendTelegramAlert } = require('./services/notificationService');
 
 // ─── App & Server Setup ──────────────────────────────────────────────────────
 
@@ -64,6 +65,7 @@ const io = new Server(server, {
 });
 
 app.set('io', io);
+app.set('sendTelegramAlert', sendTelegramAlert);
 
 // ─── Security & Middleware ───────────────────────────────────────────────────
 
