@@ -6,29 +6,23 @@
     <title>About Our Ecosystem & Leadership | ComfortXpress</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* Interactive reveal rules for content segments */
-        .reveal-section {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .reveal-section.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .reveal-section { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal-section.visible { opacity: 1; transform: translateY(0); }
         
-        .stat-box {
-            background: var(--white);
-            padding: 30px;
-            border-radius: 16px;
-            text-align: center;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
-            transition: var(--transition-smooth);
+        /* FIX: Defined container for the CEO image */
+        .ceo-image-container {
+            width: 100%;
+            height: 450px; 
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 45px rgba(0,0,0,0.1);
         }
-        .stat-box:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent-orange);
+        .ceo-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top;
         }
     </style>
 </head>
@@ -44,102 +38,41 @@
             <a href="request.html">Request a Rider</a>
             <a href="track.html">Track Parcel</a>
             <a href="contact.html">Contact Us</a>
-            
         </nav>
     </header>
 
-    <div class="page-container" style="max-width: 1100px;">
+    <div class="page-container" style="max-width: 1100px; margin: 0 auto; padding: 40px 20px;">
         
-        <!-- ================= SECTION 1: THE BUSINESS ================= -->
         <section class="reveal-section" id="businessSection" style="margin-bottom: 90px;">
-            <span style="color: var(--accent-orange); font-weight: 700; text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 10px;">Our Enterprise</span>
-            <h2 style="color: var(--primary-blue); font-size: 2.8rem; font-weight: 800; margin: 0 0 25px 0;">Premium Logistics Redefined</h2>
-            
-            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 50px; align-items: center;">
-                <div>
-                    <p style="line-height: 1.8; color: var(--text-main); font-size: 1.15rem; margin-bottom: 20px;">
-                        Founded as a state-of-the-art intra-city delivery ecosystem, <strong>ComfortXpress</strong> bridges the gap between commercial businesses and reliable logistics networks. We specialize in point-to-point dispatch accuracy, utilizing real-time tracking architecture to handle corporate deliveries with zero friction.
-                    </p>
-                    <p style="line-height: 1.8; color: var(--text-main); font-size: 1.15rem;">
-                        Our infrastructure is engineered to secure payload tracking transitions flawlessly, offering custom configurations that adapt instantly to high-priority schedules and corporate constraints.
-                    </p>
-                </div>
-                
-                <!-- Micro Grid Metrics -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div class="stat-box">
-                        <div style="font-size: 2.2rem; font-weight: 800; color: var(--primary-blue);">99.4%</div>
-                        <div style="font-size: 0.9rem; color: #64748b; font-weight: 600; margin-top: 5px;">On-Time Delivery</div>
-                    </div>
-                    <div class="stat-box">
-                        <div style="font-size: 2.2rem; font-weight: 800; color: var(--accent-orange);">150k+</div>
-                        <div style="font-size: 0.9rem; color: #64748b; font-weight: 600; margin-top: 5px;">Packages Moved</div>
-                    </div>
-                </div>
-            </div>
+            <h2 style="color: #163961; font-size: 2.8rem; font-weight: 800;">Premium Logistics Redefined</h2>
+            <p>Founded as a state-of-the-art intra-city delivery ecosystem...</p>
         </section>
 
         <hr style="border: 0; height: 1px; background: #e2e8f0; margin-bottom: 90px;">
 
-        <!-- ================= SECTION 2: THE CEO (As styled in image_eee707.jpg) ================= -->
         <section class="reveal-section" id="ceoSection">
-            <div class="about-wrapper" style="align-items: stretch;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: start;">
                 
-                <!-- CEO Image Frame matching image_eee707.jpg -->
-                <div class="ceo-image-frame" style="transform: none; opacity: 1; border: none; box-shadow: 0 20px 45px rgba(0,0,0,0.08);">
-                    <img src="assets/ceo.jpg" alt="Opeyemi Fakayode - CEO" style="height: 100%; width: 100%; object-fit: cover;">
-                    <div class="ceo-quote">"True logistics efficiency is built when technical innovation honors customer trust."</div>
+                <div class="ceo-image-container">
+                    <img src="assets/ceo.jpg" alt="Opeyemi Fakayode - CEO">
                 </div>
                 
-                <!-- CEO Biography details -->
-                <div style="display: flex; flex-direction: column; justify-content: center; padding-left: 10px;">
-                    <span style="color: var(--accent-orange); font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">Corporate Leadership</span>
-                    <h2 style="color: var(--primary-blue); font-size: 2.8rem; font-weight: 800; margin: 10px 0 15px 0;">Opeyemi Fakayode</h2>
-                    <h4 style="color: #475569; margin: 0 0 30px 0; font-size: 1.25rem; font-weight: 600;">Founder & Chief Executive Officer</h4>
-                    
-                    <p style="line-height: 1.8; color: var(--text-main); font-size: 1.1rem; margin-bottom: 20px;">
-                        Opeyemi Fakayode is a shrewd business woman and operational strategist with over 5 years of domain experience spearheading freight delivery logistics and structural growth policies. Her leadership has transformed ComfortXpress from a local dispatch service into an enterprise delivery platform.
-                    </p>
-                    <p style="line-height: 1.8; color: var(--text-main); font-size: 1.1rem;">
-                        By combining real-time communication tracking frameworks with highly vetted dispatch teams, she has set a new benchmark for cross-city delivery precision across West Africa.
+                <div>
+                    <h2 style="color: #163961; font-size: 2.5rem; margin-top: 0;">Opeyemi Fakayode</h2>
+                    <h4 style="color: #475569;">Founder & Chief Executive Officer</h4>
+                    <p style="line-height: 1.8; margin-top: 20px;">
+                        Opeyemi Fakayode is a shrewd business woman and operational strategist with over 5 years of domain experience...
                     </p>
                 </div>
-
             </div>
         </section>
-
     </div>
 
-    <footer>
-        <div class="footer-bottom">
-            <p>&copy; 2026 ComfortXpress Logistics. All Rights Reserved.</p>
-        </div>
-    </footer>
-
     <script>
-        // Trigger clean, incremental page load transitions
         window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                document.getElementById('businessSection').classList.add('visible');
-            }, 100);
-            
-            setTimeout(() => {
-                document.getElementById('ceoSection').classList.add('visible');
-            }, 400);
+            document.getElementById('businessSection').classList.add('visible');
+            setTimeout(() => document.getElementById('ceoSection').classList.add('visible'), 300);
         });
-
-        // Highlight the nav link matching the current page (keeps navbar markup identical across pages)
-        (function setActiveNavLink() {
-            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-            document.querySelectorAll('nav a').forEach(link => {
-                const linkPage = link.getAttribute('href');
-                if (linkPage === currentPage) {
-                    link.classList.add('active');
-                } else {
-                    link.classList.remove('active');
-                }
-            });
-        })();
     </script>
 </body>
 </html>
