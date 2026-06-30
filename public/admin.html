@@ -4,15 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="auth-guard.js"></script>
+    <script src="pagination.js"></script>
     <title>ComfortXpress Admin | Control Panel</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="/socket.io/socket.io.js"></script>
+
     <style>
-        :root { --primary: #163961; --accent: #F5821F; --sidebar-dark: #0b1d32; --white: #ffffff; --success: #22c55e; }
+        :root {
+            --primary: #163961; --accent: #F5821F; --sidebar-dark: #0b1d32;
+            --white: #ffffff; --success: #22c55e; --danger: #ef4444; --transit: #2563eb;
+            --muted: #64748b; --border: #e2e8f0;
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: #f8fafc; display: flex; min-height: 100vh; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; display: flex; min-height: 100vh; flex-direction: column; }
+
         .app-container { display: flex; flex: 1; }
+
         .sidebar { width: 260px; background: var(--sidebar-dark); color: white; padding: 30px 20px; display: flex; flex-direction: column; }
         .logo { font-size: 1.4rem; font-weight: 800; margin-bottom: 40px; }
         .logo span { color: var(--accent); }
@@ -20,25 +28,78 @@
         .nav-links a { color: #e2e8f0; text-decoration: none; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
         .nav-links a:hover { background: rgba(255,255,255,0.05); }
         .nav-links a.active { background: var(--primary); color: white; }
+
         .main-content { flex-grow: 1; display: flex; flex-direction: column; }
         .top-bar { background: var(--primary); padding: 20px 40px; color: white; display: flex; justify-content: space-between; align-items: center; }
-        .logout-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 6px; cursor: pointer; }
-        .container { padding: 40px; }
-        .order-entry-card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 30px; }
+        .logout-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+        .logout-btn:hover { background: rgba(255,255,255,0.2); }
+
+        .container { padding: 40px; flex-grow: 1; }
+
+        /* Order entry form */
+        .order-entry-card { background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 30px; }
+        .order-entry-card h3 { font-size: 1.05rem; margin-bottom: 15px; color: #1e293b; }
         .form-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; align-items: end; }
-        .form-grid input, .form-grid select { padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; }
-        .add-btn { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; background: white; margin-bottom: 30px; }
-        th { background: #f1f5f9; padding: 16px; text-align: left; text-transform: uppercase; font-size: 0.75rem; color: #475569; }
-        td { padding: 16px; border-bottom: 1px solid #e2e8f0; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
-        .badge-pending { background: #fee2e2; color: #991b1b; }
+        .form-grid input, .form-grid select { padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; width: 100%; font-family: inherit; font-size: 0.9rem; }
+        .add-btn { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+        .add-btn:hover { opacity: 0.9; }
+
+        /* Stat summary row */
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+        .stat-pill { background: white; border: 1px solid var(--border); border-top: 3px solid var(--primary); border-radius: 12px; padding: 18px 20px; }
+        .stat-pill.is-pending { border-top-color: var(--accent); }
+        .stat-pill.is-transit { border-top-color: var(--transit); }
+        .stat-pill.is-delivered { border-top-color: var(--success); }
+        .stat-num { display: block; font-size: 1.8rem; font-weight: 800; color: #1e293b; line-height: 1.1; }
+        .stat-label { font-size: 0.75rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 4px; display: block; }
+
+        /* Table sections */
+        .table-section { margin-bottom: 36px; }
+        .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: 1.1rem; font-weight: 700; color: #1e293b; }
+        .section-header i { color: var(--accent); }
+        .count-pill { background: #e2e8f0; color: #475569; font-size: 0.75rem; font-weight: 700; padding: 2px 10px; border-radius: 20px; }
+
+        .table-wrap-card { background: white; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.04); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; padding: 14px 16px; text-align: left; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--border); }
+        td { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; color: #334155; font-size: 0.875rem; vertical-align: top; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #f8fafc; }
+
+        .tracking-cell { font-family: 'SF Mono', Menlo, monospace; color: var(--transit); font-weight: 600; }
+        .route-cell { font-size: 0.8rem; color: var(--muted); }
+        .route-up i { color: var(--success); width: 14px; }
+        .route-down i { color: var(--danger); width: 14px; }
+        .route-cell div { margin-bottom: 3px; }
+
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; display: inline-block; }
+        .badge-pending { background: #ffedd5; color: #9a3412; }
         .badge-transit { background: #dbeafe; color: #1e40af; }
         .badge-delivered { background: #dcfce7; color: #166534; }
-        .action-dropdown { padding: 6px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; }
+
+        .tag-origin { padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+        .tag-customer { background: #e0f2fe; color: #0369a1; }
+        .tag-admin { background: #f1f5f9; color: #475569; }
+
+        .action-dropdown { padding: 6px 8px; border-radius: 6px; border: 1px solid #cbd5e1; background: white; cursor: pointer; font-size: 0.82rem; font-family: inherit; }
+
+        .empty-row { text-align: center; color: var(--muted); padding: 36px 16px; font-size: 0.9rem; }
+        .error-row { color: var(--danger); font-weight: 600; }
+
+        /* Pagination */
+        .pagination-bar { display: flex; justify-content: space-between; align-items: center; padding: 14px 4px 0 4px; flex-wrap: wrap; gap: 10px; }
+        .pagination-info { font-size: 0.8rem; color: var(--muted); }
+        .pagination-controls { display: flex; gap: 6px; }
+        .page-btn { min-width: 32px; height: 32px; padding: 0 8px; border: 1px solid var(--border); background: white; border-radius: 6px; cursor: pointer; font-size: 0.82rem; color: #334155; font-family: inherit; }
+        .page-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+        .page-btn-active { background: var(--primary); border-color: var(--primary); color: white; font-weight: 600; }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        footer { text-align: center; padding: 20px; color: #94a3b8; font-size: 0.85rem; }
     </style>
 </head>
 <body>
+
     <div class="app-container">
         <nav class="sidebar">
             <div class="logo">Comfort<span>Xpress</span></div>
@@ -49,58 +110,189 @@
                 <li><a href="message.html"><i class="fas fa-comment-alt"></i> Contact Us</a></li>
             </ul>
         </nav>
+
         <main class="main-content">
             <header class="top-bar">
-                <h2>Admin Control Panel</h2>
+                <h2><i class="fas fa-lock"></i> Admin Control Panel</h2>
                 <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
             </header>
+
             <div class="container">
                 <section class="order-entry-card">
+                    <h3>Create New Order (Manual Admin Entry)</h3>
                     <div class="form-grid">
                         <input type="text" id="cName" placeholder="Customer Name">
-                        <select id="pType"><option>Personal Delivery</option><option>Corporate Dispatch</option></select>
+                        <select id="pType">
+                            <option value="Personal Delivery">Personal Delivery</option>
+                            <option value="Corporate Dispatch">Corporate Dispatch</option>
+                            <option value="Bulk/Express Courier">Bulk/Express Courier</option>
+                        </select>
                         <input type="text" id="pickup" placeholder="Pickup Address">
                         <input type="text" id="dropoff" placeholder="Dropoff Address">
                         <button class="add-btn" onclick="createOrder()">Add Order</button>
                     </div>
                 </section>
-                <table id="activeOrdersTable">
-                    <thead><tr><th>Details</th><th>Tracking ID</th><th>Customer</th><th>Status</th><th>Action</th></tr></thead>
-                    <tbody id="activeOrdersBody"></tbody>
-                </table>
+
+                <div class="stats-row">
+                    <div class="stat-pill is-pending">
+                        <span class="stat-num" id="statPending">0</span>
+                        <span class="stat-label">Pending</span>
+                    </div>
+                    <div class="stat-pill is-transit">
+                        <span class="stat-num" id="statTransit">0</span>
+                        <span class="stat-label">In Transit</span>
+                    </div>
+                    <div class="stat-pill is-delivered">
+                        <span class="stat-num" id="statDelivered">0</span>
+                        <span class="stat-label">Delivered</span>
+                    </div>
+                    <div class="stat-pill">
+                        <span class="stat-num" id="statTotal">0</span>
+                        <span class="stat-label">Total Orders</span>
+                    </div>
+                </div>
+
+                <section class="table-section">
+                    <div class="section-header">
+                        <i class="fas fa-truck-ramp-box"></i> Active Shipments
+                        <span class="count-pill" id="activeSectionCount">0</span>
+                    </div>
+                    <div class="table-wrap-card">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Logistics</th><th>Tracking ID</th><th>Customer</th>
+                                    <th>Origin</th><th>Route</th><th>Status</th><th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activeOrdersBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-bar" id="activePagination"></div>
+                </section>
+
+                <section class="table-section">
+                    <div class="section-header">
+                        <i class="fas fa-circle-check"></i> Completed Deliveries
+                        <span class="count-pill" id="completedSectionCount">0</span>
+                    </div>
+                    <div class="table-wrap-card">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Logistics</th><th>Tracking ID</th><th>Customer</th>
+                                    <th>Origin</th><th>Route</th><th>Status</th><th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="completedOrdersBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-bar" id="completedPagination"></div>
+                </section>
             </div>
+
+            <footer>&copy; 2026 ComfortXpress Admin Portal. All rights reserved.</footer>
         </main>
     </div>
 
     <script>
+        const ACTIVE_PAGE_SIZE = 6;
+        const COMPLETED_PAGE_SIZE = 6;
+
+        let allOrders = [];
+        let activePage = 1;
+        let completedPage = 1;
+
+        // ─── SOCKET ───
+        let socket;
+        try {
+            socket = io();
+            socket.emit('joinAdminRoom');
+        } catch (e) { console.warn('Socket init failed.'); }
+
+        function byNewestFirst(a, b) {
+            return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+        }
+
+        function originTag(order) {
+            return order.origin === 'customer'
+                ? `<span class="tag-origin tag-customer"><i class="fas fa-laptop"></i> Client App</span>`
+                : `<span class="tag-origin tag-admin"><i class="fas fa-user-shield"></i> Admin Desk</span>`;
+        }
+
+        function statusBadge(status) {
+            let cls = 'badge-pending';
+            if (status === 'In Transit') cls = 'badge-transit';
+            if (status === 'Delivered') cls = 'badge-delivered';
+            return `<span class="badge ${cls}">${status || 'Pending'}</span>`;
+        }
+
+        function renderOrderRow(order) {
+            return `<tr>
+                <td><strong>${order.packageDetails || 'Standard'}</strong></td>
+                <td class="tracking-cell">${order.trackingId || 'N/A'}</td>
+                <td>${order.customerName || 'Guest'}</td>
+                <td>${originTag(order)}</td>
+                <td class="route-cell">
+                    <div class="route-up"><i class="fas fa-arrow-up"></i> ${order.pickupAddress || 'N/A'}</div>
+                    <div class="route-down"><i class="fas fa-arrow-down"></i> ${order.dropoffAddress || order.deliveryAddress || 'N/A'}</div>
+                </td>
+                <td>${statusBadge(order.status)}</td>
+                <td>
+                    <select class="action-dropdown" onchange="updateStatus('${order._id}', this.value)">
+                        <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                        <option value="In Transit" ${order.status === 'In Transit' ? 'selected' : ''}>In Transit</option>
+                        <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                    </select>
+                </td>
+            </tr>`;
+        }
+
+        function renderTables() {
+            const active = allOrders.filter(o => o.status !== 'Delivered').sort(byNewestFirst);
+            const completed = allOrders.filter(o => o.status === 'Delivered').sort(byNewestFirst);
+
+            const activeResult = paginateItems(active, activePage, ACTIVE_PAGE_SIZE);
+            const completedResult = paginateItems(completed, completedPage, COMPLETED_PAGE_SIZE);
+            activePage = activeResult.currentPage;
+            completedPage = completedResult.currentPage;
+
+            document.getElementById('activeOrdersBody').innerHTML = activeResult.pageItems.length
+                ? activeResult.pageItems.map(renderOrderRow).join('')
+                : `<tr><td colspan="7" class="empty-row">No active shipments right now. New requests from the site or this desk will appear here.</td></tr>`;
+
+            document.getElementById('completedOrdersBody').innerHTML = completedResult.pageItems.length
+                ? completedResult.pageItems.map(renderOrderRow).join('')
+                : `<tr><td colspan="7" class="empty-row">No deliveries completed yet.</td></tr>`;
+
+            renderPaginationControls(document.getElementById('activePagination'), activeResult, (p) => { activePage = p; renderTables(); });
+            renderPaginationControls(document.getElementById('completedPagination'), completedResult, (p) => { completedPage = p; renderTables(); });
+
+            document.getElementById('activeSectionCount').innerText = active.length;
+            document.getElementById('completedSectionCount').innerText = completed.length;
+
+            document.getElementById('statPending').innerText = allOrders.filter(o => o.status === 'Pending' || !o.status).length;
+            document.getElementById('statTransit').innerText = allOrders.filter(o => o.status === 'In Transit').length;
+            document.getElementById('statDelivered').innerText = completed.length;
+            document.getElementById('statTotal').innerText = allOrders.length;
+        }
+
         async function fetchOrders() {
             try {
                 const res = await fetch('/api/orders', { credentials: 'include' });
                 if (!res.ok) throw new Error('Unauthorized');
-                const orders = await res.json();
-                const tbody = document.getElementById('activeOrdersBody');
-                tbody.innerHTML = orders.map(order => {
-                    let badgeClass = 'badge-pending';
-                    if (order.status === 'In Transit') badgeClass = 'badge-transit';
-                    if (order.status === 'Delivered') badgeClass = 'badge-delivered';
-
-                    return `<tr>
-                        <td>${order.packageDetails}</td><td>${order.trackingId}</td><td>${order.customerName}</td>
-                        <td><span class="badge ${badgeClass}">${order.status}</span></td>
-                        <td>
-                            <select class="action-dropdown" onchange="updateStatus('${order._id}', this.value)">
-                                <option value="Pending" ${order.status==='Pending'?'selected':''}>Pending</option>
-                                <option value="In Transit" ${order.status==='In Transit'?'selected':''}>In Transit</option>
-                                <option value="Delivered" ${order.status==='Delivered'?'selected':''}>Delivered</option>
-                            </select>
-                        </td>
-                    </tr>`;
-                }).join('');
-            } catch (err) { console.error(err); }
+                allOrders = await res.json();
+                renderTables();
+            } catch (err) {
+                console.error('Fetch error:', err);
+                document.getElementById('activeOrdersBody').innerHTML =
+                    `<tr><td colspan="7" class="empty-row error-row">Couldn't load orders — check the console for details.</td></tr>`;
+            }
         }
 
         async function createOrder() {
             const body = {
+                trackingId: 'CX-ADM' + Math.floor(Math.random() * 90000 + 10000),
                 customerName: document.getElementById('cName').value,
                 packageDetails: document.getElementById('pType').value,
                 pickupAddress: document.getElementById('pickup').value,
@@ -120,39 +312,50 @@
                 if (!res.ok) {
                     const errText = await res.text();
                     console.error('Create order failed:', res.status, errText);
-                    alert(`Could not create order (HTTP ${res.status}).`);
+                    alert(`Could not create order (HTTP ${res.status}). Check the console for details.`);
                     return;
                 }
 
+                document.getElementById('cName').value = '';
+                document.getElementById('pickup').value = '';
+                document.getElementById('dropoff').value = '';
+                activePage = 1; // jump to page 1 so the new order is immediately visible
                 fetchOrders();
             } catch (err) {
-                console.error(err);
+                console.error('Create order network error:', err);
                 alert('Could not reach the server while creating the order.');
             }
         }
 
-        async function updateStatus(id, status) {
+        async function updateStatus(orderId, newStatus) {
             try {
-                const res = await fetch(`/api/orders/${id}`, {
+                const res = await fetch(`/api/orders/${orderId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ status })
+                    body: JSON.stringify({ status: newStatus })
                 });
 
                 if (!res.ok) {
-                    console.error('Update status failed:', res.status);
-                    alert(`Could not update order status (HTTP ${res.status}).`);
+                    const errText = await res.text();
+                    console.error('Update status failed:', res.status, errText);
+                    alert(`Could not update order status (HTTP ${res.status}). Check the console for details.`);
                     return;
                 }
 
                 fetchOrders();
             } catch (err) {
-                console.error(err);
+                console.error('Update status network error:', err);
                 alert('Could not reach the server while updating the order.');
             }
         }
 
+        if (socket) {
+            socket.on('newOrderCreated', fetchOrders);
+            socket.on('orderUpdated', fetchOrders);
+        }
+
+        setInterval(fetchOrders, 5000);
         window.onload = fetchOrders;
     </script>
 </body>

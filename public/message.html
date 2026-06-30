@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="auth-guard.js"></script>
+    <script src="pagination.js"></script>
     <title>ComfortXpress Admin | Support Inquiries Desk</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
-        :root { --primary: #163961; --accent: #F5821F; --sidebar-dark: #0b1d32; --white: #ffffff; --success: #22c55e; }
+        :root { --primary: #163961; --accent: #F5821F; --sidebar-dark: #0b1d32; --white: #ffffff; --success: #22c55e; --muted: #64748b; --border: #e2e8f0; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: #f8fafc; display: flex; min-height: 100vh; }
         .sidebar { width: 260px; background: var(--sidebar-dark); color: white; padding: 30px 20px; display: flex; flex-direction: column; }
@@ -17,15 +18,38 @@
         .logo span { color: var(--accent); }
         .nav-links { list-style: none; flex-grow: 1; }
         .nav-links a { color: #e2e8f0; text-decoration: none; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
+        .nav-links a:hover { background: rgba(255,255,255,0.05); }
         .nav-links a.active { background: var(--primary); color: white; }
         .main-content { flex-grow: 1; display: flex; flex-direction: column; }
         .top-bar { background: var(--primary); padding: 20px 40px; color: white; display: flex; justify-content: space-between; align-items: center; }
-        .logout-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+        .logout-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+        .logout-btn:hover { background: rgba(255,255,255,0.2); }
         .container { padding: 40px; }
-        .table-wrap-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+        .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: 1.1rem; font-weight: 700; color: #1e293b; }
+        .count-pill { background: #e2e8f0; color: #475569; font-size: 0.72rem; font-weight: 700; padding: 2px 10px; border-radius: 20px; }
+
+        .table-wrap-card { background: white; border-radius: 12px; border: 1px solid var(--border); padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
         table { width: 100%; border-collapse: collapse; }
-        th { background: #f1f5f9; padding: 16px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: #475569; }
-        td { padding: 16px; border-bottom: 1px solid #e2e8f0; color: #334155; font-size: 0.9rem; }
+        th { background: #f8fafc; padding: 14px 16px; text-align: left; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--border); }
+        td { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; color: #334155; font-size: 0.875rem; vertical-align: top; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #f8fafc; }
+        .msg-cell { max-width: 360px; line-height: 1.5; color: #475569; }
+        .email-link { color: var(--primary); text-decoration: none; font-size: 0.85rem; }
+        .email-link:hover { text-decoration: underline; }
+        .date-cell { white-space: nowrap; color: var(--muted); font-size: 0.82rem; }
+
+        .empty-row { text-align: center; color: var(--muted); padding: 40px 16px; font-size: 0.9rem; }
+
+        /* Pagination */
+        .pagination-bar { display: flex; justify-content: space-between; align-items: center; padding: 14px 4px 0 4px; flex-wrap: wrap; gap: 10px; }
+        .pagination-info { font-size: 0.8rem; color: var(--muted); }
+        .pagination-controls { display: flex; gap: 6px; }
+        .page-btn { min-width: 32px; height: 32px; padding: 0 8px; border: 1px solid var(--border); background: white; border-radius: 6px; cursor: pointer; font-size: 0.82rem; color: #334155; font-family: inherit; }
+        .page-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+        .page-btn-active { background: var(--primary); border-color: var(--primary); color: white; font-weight: 600; }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -47,46 +71,59 @@
         </header>
 
         <div class="container">
+            <div class="section-header"><i class="fas fa-envelope-open-text" style="color:var(--accent);"></i> Customer Messages <span class="count-pill" id="inquiryCount">0</span></div>
             <div class="table-wrap-card">
                 <table>
                     <thead>
-                        <tr><th>From</th><th>Email</th><th>Message</th><th>Date</th></tr>
+                        <tr><th>From</th><th>Email</th><th>Subject</th><th>Message</th><th>Date</th></tr>
                     </thead>
-                    <tbody id="messageBody">
-                    </tbody>
+                    <tbody id="messageBody"></tbody>
                 </table>
             </div>
+            <div class="pagination-bar" id="messagePagination"></div>
         </div>
     </main>
 
     <script>
-        // FETCH AND RENDER
+        const PAGE_SIZE = 8;
+        let allMessages = [];
+        let currentPage = 1;
+
+        function renderRow(m) {
+            return `<tr>
+                <td><strong>${m.fullName || 'Anonymous'}</strong></td>
+                <td><a class="email-link" href="mailto:${m.emailAddress}">${m.emailAddress || 'N/A'}</a></td>
+                <td>${m.msgSubject || 'No Subject'}</td>
+                <td class="msg-cell">${m.messageBody || ''}</td>
+                <td class="date-cell">${m.createdAt ? new Date(m.createdAt).toLocaleDateString() : 'N/A'}</td>
+            </tr>`;
+        }
+
+        function renderTable() {
+            const result = paginateItems(allMessages, currentPage, PAGE_SIZE);
+            currentPage = result.currentPage;
+
+            const body = document.getElementById('messageBody');
+            body.innerHTML = result.pageItems.length
+                ? result.pageItems.map(renderRow).join('')
+                : `<tr><td colspan="5" class="empty-row">No inquiries yet. New messages from the Contact Us page will appear here.</td></tr>`;
+
+            document.getElementById('inquiryCount').innerText = allMessages.length;
+            renderPaginationControls(document.getElementById('messagePagination'), result, (p) => { currentPage = p; renderTable(); });
+        }
+
         async function fetchMessages() {
             try {
-                // Added {credentials: 'include'} to send the session cookie
                 const res = await fetch('/api/admin/inquiries', { credentials: 'include' });
-                
                 if (!res.ok) throw new Error('Authorization failed');
-                
-                const msgs = await res.json();
-                const body = document.getElementById('messageBody');
-                body.innerHTML = '';
-                
-                if (msgs.length === 0) {
-                    body.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#94a3b8;">No inquiries logged yet.</td></tr>';
-                    return;
-                }
 
-                msgs.forEach(m => {
-                    body.innerHTML += `<tr>
-                        <td><strong>${m.fullName || 'Anonymous'}</strong></td>
-                        <td>${m.emailAddress || 'N/A'}</td>
-                        <td>${m.messageBody || ''}</td>
-                        <td>${new Date(m.createdAt).toLocaleDateString()}</td>
-                    </tr>`;
-                });
-            } catch (err) { 
-                console.error('Failed to load messages:', err); 
+                allMessages = await res.json();
+                allMessages.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+                renderTable();
+            } catch (err) {
+                console.error('Failed to load messages:', err);
+                document.getElementById('messageBody').innerHTML =
+                    `<tr><td colspan="5" class="empty-row" style="color:#dc2626;">Couldn't load messages — check the console for details.</td></tr>`;
             }
         }
 
