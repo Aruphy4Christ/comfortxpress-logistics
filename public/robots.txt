@@ -1,0 +1,11 @@
+User-agent: *
+
+# Allow all pages
+Allow: /
+
+# Prevent search engines from indexing your admin area
+Disallow: /admin
+Disallow: /api
+
+# Sitemap
+Sitemap: https://comfortxpress-logistics.onrender.com/sitemap.xml
