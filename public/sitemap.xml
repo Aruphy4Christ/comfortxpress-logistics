@@ -9,31 +9,31 @@
     </url>
 
     <url>
-        <loc>https://comfortxpress-logistics.onrender.com/live-feed</loc>
+        <loc>https://comfortxpress-logistics.onrender.com/live-feed.html</loc>
         <priority>0.9</priority>
         <changefreq>daily</changefreq>
     </url>
 
     <url>
-        <loc>https://comfortxpress-logistics.onrender.com/message</loc>
+        <loc>https://comfortxpress-logistics.onrender.com/message.html</loc>
         <priority>0.9</priority>
         <changefreq>weekly</changefreq>
     </url>
 
     <url>
-        <loc>https://comfortxpress-logistics.onrender.com/request</loc>
+        <loc>https://comfortxpress-logistics.onrender.com/request.html</loc>
         <priority>0.8</priority>
         <changefreq>monthly</changefreq>
     </url>
 
     <url>
-        <loc>https://comfortxpress-logistics.onrender.com/track</loc>
+        <loc>https://comfortxpress-logistics.onrender.com/track.html</loc>
         <priority>0.8</priority>
         <changefreq>monthly</changefreq>
     </url>
 
     <url>
-        <loc>https://comfortxpress-logistics.onrender.com/dashboard</loc>
+        <loc>https://comfortxpress-logistics.onrender.com/dashboard.html</loc>
         <priority>0.8</priority>
         <changefreq>monthly</changefreq>
     </url>
