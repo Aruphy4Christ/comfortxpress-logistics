@@ -8,11 +8,6 @@
         <changefreq>weekly</changefreq>
     </url>
 
-    <url>
-        <loc>https://comfortxpress-logistics.onrender.com/live-feed.html</loc>
-        <priority>0.9</priority>
-        <changefreq>daily</changefreq>
-    </url>
 
     <url>
         <loc>https://comfortxpress-logistics.onrender.com/contact.html</loc>
